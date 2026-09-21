@@ -327,6 +327,23 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
   <p class="lead">"일정에 넣기"를 누르면 원하는 날짜의 일정표에 바로 추가됩니다. 영업시간·휴무일은 방문 전 지도 앱에서 확인하세요.</p>
   <div class="pills" id="placeFilter"></div>
   <div class="grid g3" id="placeGrid"></div>
+
+  <h3 style="margin-top:26px">내가 등록한 장소</h3>
+  <p class="lead small">이름과 지도 검색어(또는 네이버 지도 공유 링크)를 저장해두면, 매번 새로 검색하지 않고 바로 그 장소로 이동할 수 있어요.</p>
+  <div class="card edit-only" style="margin-bottom:16px">
+    <form id="myPlaceForm">
+      <div class="row">
+        <label class="f" style="flex:2 1 160px"><span>장소 이름</span><input type="text" id="mpName" placeholder="예: 그 카페" required></label>
+        <label class="f" style="flex:2 1 200px"><span>지도 검색어 또는 링크</span><input type="text" id="mpQuery" placeholder="예: 안동 OO카페 / 또는 네이버지도 링크 붙여넣기" required></label>
+      </div>
+      <div class="row">
+        <label class="f"><span>분류</span><select id="mpTag"><option value="">없음</option><option value="관람">관람</option><option value="식사">식사</option><option value="이동">이동</option><option value="축제">축제</option></select></label>
+        <label class="f" style="flex:2 1 200px"><span>메모</span><input type="text" id="mpNote" placeholder="선택 사항"></label>
+        <button class="btn" type="submit">등록</button>
+      </div>
+    </form>
+  </div>
+  <div class="grid g3" id="myPlaceGrid"></div>
 </section>
 
 <!-- 예약·메모 -->
@@ -357,6 +374,16 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
   <div class="card" style="margin-top:16px">
     <h3>예약 목록</h3>
     <ul class="list" id="bkList"></ul>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>무료 주차장 <span class="tag" style="margin-left:6px">~9/27</span></h3>
+    <p class="small muted" style="margin:0 0 10px">추석 연휴 기간 무료 개방 주차장입니다(9/27까지). 이후에는 요금이 부과될 수 있으니 현장 안내를 확인하세요.</p>
+    <ul class="list">
+      <li><span class="grow">옥동공영주차장</span><a class="btn ghost sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%EC%98%A5%EB%8F%99%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5">지도</a></li>
+      <li><span class="grow">터미널공영주차장</span><a class="btn ghost sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%ED%84%B0%EB%AF%B8%EB%84%90%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5">지도</a></li>
+      <li><span class="grow">웅부공원공영주차장</span><a class="btn ghost sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%EC%9B%85%EB%B6%80%EA%B3%B5%EC%9B%90%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5">지도</a></li>
+      <li><span class="grow">송현오거리공영주차장</span><a class="btn ghost sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%EC%86%A1%ED%98%84%EC%98%A4%EA%B1%B0%EB%A6%AC%EA%B3%B5%EC%98%81%EC%A3%BC%EC%B0%A8%EC%9E%A5">지도</a></li>
+    </ul>
   </div>
   <div class="card" style="margin-top:16px">
     <h3>바로가기</h3>
@@ -462,6 +489,7 @@ const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const mapUrl=q=>'https://map.naver.com/p/search/'+encodeURIComponent(q);
+const mapLink=q=>/^https?:\/\//i.test(String(q||'').trim())?String(q).trim():mapUrl(q);
 
 /* ---------- default data ---------- */
 function mk(time,title,place,tag,note){return {id:uid(),time,title,place,tag,note:note||'',done:false};}
@@ -469,31 +497,25 @@ function defaults(){
   return {
     plan:[
       [
-        mk('11:30','안동 도착, 짐 맡기기','안동역','이동','추석 연휴 끝이라 도로·주차가 혼잡할 수 있어요. 숙소에 먼저 짐을 맡기면 편합니다.'),
-        mk('12:30','안동찜닭 점심','안동 구시장 찜닭골목','식사','연휴 휴무·대기 여부를 미리 확인하세요.'),
-        mk('14:00','탈춤공원 축제 구경','탈춤공원','축제','세계탈놀이, 공연, 체험 부스. 공연 시간표는 공식 사이트에서 확인.'),
-        mk('16:00','하회마을 산책·별신굿탈놀이','하회마을','관람','축제 기간 셔틀·교통 통제를 확인하세요.'),
-        mk('18:00','저녁 식사','하회마을 식당','식사','줄불놀이 전에 미리 식사하는 것을 권합니다.'),
-        mk('19:00','선유줄불놀이','부용대','축제','9/26 오후 7시 만송정·부용대 일원. 줄불, 낙화, 달걀불, 뱃놀이.'),
-        mk('20:30','숙소 체크인','안동 숙소','휴식','')
+        mk('08:00','부산 출발','','이동',''),
+        mk('11:00','안동신세계찜닭','안동신세계찜닭','식사','찜닭골목'),
+        mk('12:30','병산서원','병산서원','관람','풍천면'),
+        mk('14:00','하회마을','하회마을','관람',''),
+        mk('14:00','탈빙고','안동 탈빙고','식사','하회마을 · 빙수'),
+        mk('16:00','목석원','안동 목석원','식사','하회마을 · 숯불간고등어'),
+        mk('17:00','선유줄불놀이','부용대','축제','하회마을(부용대)'),
+        mk('21:00','숙소 체크인','태화동','휴식','비앤비 · 정확한 상호·주소는 예약 확인 후 입력하세요')
       ],
       [
-        mk('09:00','조식, 체크아웃 준비','','휴식',''),
-        mk('10:00','월영교·안동호 산책','월영교','관람','나무로 만든 보행교. 아침 산책하기 좋아요.'),
-        mk('11:30','안동민속박물관','안동민속박물관','관람','운영 시간 확인.'),
-        mk('12:30','헛제삿밥 또는 건진국수','안동 헛제삿밥','식사','대표 안동 향토음식.'),
-        mk('14:00','도산서원','도산서원','관람','퇴계 이황을 모신 서원. 낙동강변 풍경도 함께.'),
-        mk('16:30','카페·빵집 휴식','맘모스제과','식사','안동 명물 맘모스빵.'),
-        mk('18:00','저녁 식사','안동 간고등어 식당','식사','안동간고등어 구이 정식 등.'),
-        mk('19:30','탈춤공원 밤 공연','탈춤공원','축제','야간 공연·대동난장. 시간표 확인.')
+        mk('10:00','골목안손국수','안동 골목안손국수','식사','찜닭골목 근처 · 안동국시'),
+        mk('11:00','안동민속촌','안동민속촌','관람',''),
+        mk('12:30','도산서원','도산서원','관람','도산면'),
+        mk('14:30','아차가','안동 아차가','식사','안동문화의거리 · 아이스크림'),
+        mk('15:30','월영교','월영교','관람','주차는 민속박물관 쪽 이용'),
+        mk('17:00','숙소 체크인','안동문화의거리','휴식','정확한 숙소명·주소는 예약 확인 후 입력하세요'),
+        mk('18:00','맘모스','맘모스제과 안동','식사','안동문화의거리 · 빵(크림치즈, 유자파운드)')
       ],
-      [
-        mk('09:30','체크아웃','','이동','짐은 차량이나 숙소 보관소에.'),
-        mk('10:30','병산서원','병산서원','관람','유네스코 세계유산. 만대루에서 보는 병산과 낙동강.'),
-        mk('12:30','점심 식사','안동 국시','식사',''),
-        mk('14:00','구시장 선물 쇼핑','안동 구시장','식사','간고등어, 안동소주, 맘모스빵 등.'),
-        mk('15:30','안동 출발','안동역','이동','귀갓길 혼잡을 감안해 여유 있게.')
-      ]
+      []
     ],
     budget:500000, people:2, expenses:[],
     packing:[
@@ -502,7 +524,7 @@ function defaults(){
       ['축제·야외','돗자리·접이식 방석'],['축제·야외','모자, 선크림'],['축제·야외','물티슈, 마스크'],['축제·야외','손난로 또는 담요(밤 공연)'],
       ['건강','상비약(소화제, 진통제, 밴드)'],['건강','편한 양말, 갈아 신을 양말']
     ].map(([g,t])=>({id:uid(),group:g,text:t,done:false})),
-    bookings:[], memo:''
+    bookings:[], memo:'', myPlaces:[]
   };
 }
 const DKEY='andong-dirty-v1';
@@ -692,7 +714,7 @@ function renderPills(){
   $('#dayPills').innerHTML=DAYLBL.map((l,i)=>`<button class="pill" type="button" data-d="${i}" aria-pressed="${i===curDay}">${l}</button>`).join('');
   $$('#dayPills .pill').forEach(b=>b.onclick=()=>{curDay=+b.dataset.d;renderPlan();});
 }
-const DAYMETA=['추석 연휴 마지막 날 · 선유줄불놀이 19:00','도산서원과 월영교 중심의 유교 문화 하루','월요일 · 휴관 여부 확인 후 병산서원과 쇼핑'];
+const DAYMETA=['부산 출발 · 하회마을·탈빙고·목석원·선유줄불놀이','안동민속촌·도산서원·월영교, 맘모스 빵집','아직 등록된 일정이 없어요 · "일정 추가"로 채워보세요'];
 function renderPlan(){
   renderPills();
   sortDay(curDay);
@@ -706,7 +728,7 @@ function renderPlan(){
         <div><span class="ti">${esc(it.title)}</span> <span class="tag ${esc(it.tag)}">${esc(it.tag)}</span></div>
         ${it.note?`<div class="small muted">${esc(it.note)}</div>`:''}
         <div class="acts">
-          ${it.place?`<a href="${mapUrl(it.place)}" target="_blank" rel="noopener">지도 보기</a>`:''}
+          ${it.place?`<a href="${mapLink(it.place)}" target="_blank" rel="noopener">지도 보기</a>`:''}
           <button type="button" class="edit-only" data-act="edit">수정</button>
           <button type="button" class="edit-only" data-act="del">삭제</button>
         </div>
@@ -770,7 +792,7 @@ function renderStats(){
     <div class="big" style="font-size:24px;margin:2px 0 6px">${esc(target.title)}</div>
     <div class="small muted">${esc(target.note)}</div>
     <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-      ${target.place?`<a class="btn ghost sm" href="${mapUrl(target.place)}" target="_blank" rel="noopener" style="text-decoration:none">지도 보기</a>`:''}
+      ${target.place?`<a class="btn ghost sm" href="${mapLink(target.place)}" target="_blank" rel="noopener" style="text-decoration:none">지도 보기</a>`:''}
       <button class="btn ghost sm" type="button" id="goPlan">일정표 열기</button>
     </div>`:`<div class="muted">${label||'남은 일정이 없습니다.'}</div>`;
   const g=$('#goPlan');if(g)g.onclick=()=>{curDay=day;renderPlan();showTab('plan');};
@@ -842,7 +864,6 @@ const PLACES=[
   {n:'도산서원',c:'명소',d:'퇴계 이황의 학문이 깃든 서원. 강변 풍경과 함께 천천히 걷기 좋아요.',q:'도산서원',t:'14:00',tag:'관람'},
   {n:'병산서원',c:'명소',d:'만대루에서 병산과 낙동강을 바라보는 유네스코 세계유산 서원.',q:'병산서원',t:'10:30',tag:'관람'},
   {n:'부용대',c:'명소',d:'하회마을 전경을 내려다보는 전망 명소. 선유줄불놀이 무대 일원.',q:'부용대',t:'18:30',tag:'관람'},
-  {n:'탈춤공원',c:'명소',d:'안동국제탈춤페스티벌의 중심 무대.',q:'탈춤공원',t:'14:00',tag:'축제'},
   {n:'봉정사',c:'명소',d:'유네스코 세계유산 산사. 여유가 있으면 대안 코스로.',q:'봉정사',t:'15:00',tag:'관람'},
   {n:'안동민속박물관',c:'명소',d:'월영교 인근 박물관. 월요일 휴관 여부 확인.',q:'안동민속박물관',t:'11:30',tag:'관람'},
   {n:'안동찜닭골목',c:'먹거리',d:'구시장 안 찜닭 가게가 모인 골목. 안동 대표 음식.',q:'안동 구시장 찜닭골목',t:'12:30',tag:'식사'},
@@ -850,17 +871,41 @@ const PLACES=[
   {n:'안동간고등어',c:'먹거리',d:'염장한 고등어를 구워 내는 정식. 간이 잘 밴 맛.',q:'안동 간고등어 정식',t:'18:00',tag:'식사'},
   {n:'건진국수',c:'먹거리',d:'콩가루를 넣은 면과 멸치 육수의 안동식 국수.',q:'안동 건진국수',t:'12:30',tag:'식사'},
   {n:'맘모스제과',c:'먹거리',d:'안동을 대표하는 빵집. 맘모스빵이 유명해요.',q:'맘모스제과 안동',t:'16:30',tag:'식사'},
-  {n:'안동 구시장',c:'먹거리',d:'간고등어, 안동소주 등 선물과 길거리 먹거리.',q:'안동 구시장',t:'14:00',tag:'식사'}
+  {n:'안동 구시장',c:'먹거리',d:'간고등어, 안동소주 등 선물과 길거리 먹거리.',q:'안동 구시장',t:'14:00',tag:'식사'},
+  {n:'탈춤공원',c:'축제',d:'안동국제탈춤페스티벌의 중심 무대. 국내외 탈춤 공연과 체험 부스.',q:'탈춤공원',t:'14:00',tag:'축제'},
+  {n:'선유줄불놀이(부용대)',c:'축제',d:'9/26 저녁 만송정·부용대 일원에서 열리는 줄불·낙화·달걀불·뱃놀이.',q:'부용대',t:'19:00',tag:'축제'},
+  {n:'하회별신굿탈놀이',c:'축제',d:'하회마을 내 탈놀이전수관에서 열리는 국가무형유산 상설공연.',q:'하회마을 탈놀이전수관',t:'14:00',tag:'축제'},
+  {n:'원도심 공연존(중앙선1942)',c:'축제',d:'옛 안동역 부지 일원의 축제 공연·체험 프로그램.',q:'중앙선1942안동역',t:'15:00',tag:'축제'}
 ];
 let pf='전체';
 function renderPlaces(){
-  $('#placeFilter').innerHTML=['전체','명소','먹거리'].map(f=>`<button type="button" class="pill" data-f="${f}" aria-pressed="${f===pf}">${f}</button>`).join('');
+  $('#placeFilter').innerHTML=['전체','명소','먹거리','축제'].map(f=>`<button type="button" class="pill" data-f="${f}" aria-pressed="${f===pf}">${f}</button>`).join('');
   $$('#placeFilter .pill').forEach(b=>b.onclick=()=>{pf=b.dataset.f;renderPlaces();});
   $('#placeGrid').innerHTML=PLACES.map((p,i)=>({p,i})).filter(o=>pf==='전체'||o.p.c===pf).map(({p,i})=>`
     <div class="card place"><span class="tag ${p.tag}">${p.c}</span><h3 style="margin-top:8px">${esc(p.n)}</h3><p class="small muted">${esc(p.d)}</p>
-    <div class="acts"><a class="btn ghost sm" style="text-decoration:none" href="${mapUrl(p.q)}" target="_blank" rel="noopener">지도</a><button class="btn sm" type="button" data-i="${i}">일정에 넣기</button></div></div>`).join('');
+    <div class="acts"><a class="btn ghost sm" style="text-decoration:none" href="${mapLink(p.q)}" target="_blank" rel="noopener">지도</a><button class="btn sm" type="button" data-i="${i}">일정에 넣기</button></div></div>`).join('');
   $$('#placeGrid .btn[data-i]').forEach(b=>b.onclick=()=>{const p=PLACES[+b.dataset.i];openDlg(null,curDay,{time:p.t,title:p.n,place:p.q,tag:p.tag,note:p.d});});
+  renderMyPlaces();
 }
+function renderMyPlaces(){
+  const box=$('#myPlaceGrid');if(!box)return;
+  box.innerHTML=S.myPlaces.length?S.myPlaces.map(p=>`
+    <div class="card place" data-id="${p.id}">${p.tag?`<span class="tag ${p.tag}">${esc(p.tag)}</span>`:''}<h3 style="margin-top:8px">${esc(p.name)}</h3>${p.note?`<p class="small muted">${esc(p.note)}</p>`:''}
+    <div class="acts"><a class="btn ghost sm" style="text-decoration:none" href="${mapLink(p.query)}" target="_blank" rel="noopener">지도</a><button class="btn sm" type="button" data-act="add">일정에 넣기</button><button class="btn ghost sm edit-only" type="button" data-act="del">삭제</button></div></div>`).join(''):'<p class="muted small">아직 등록한 장소가 없어요.</p>';
+}
+$('#myPlaceForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=$('#mpName').value.trim(),query=$('#mpQuery').value.trim();
+  if(!name||!query)return;
+  S.myPlaces.push({id:uid(),name,query,tag:$('#mpTag').value,note:$('#mpNote').value.trim()});
+  ['#mpName','#mpQuery','#mpNote'].forEach(s=>$(s).value='');$('#mpTag').value='';
+  save();renderMyPlaces();toast('장소를 등록했어요');
+});
+$('#myPlaceGrid').addEventListener('click',e=>{
+  const card=e.target.closest('.card[data-id]');if(!card)return;const p=S.myPlaces.find(x=>x.id===card.dataset.id);if(!p)return;
+  if(e.target.dataset.act==='del'){S.myPlaces=S.myPlaces.filter(x=>x!==p);save();renderMyPlaces();}
+  else if(e.target.dataset.act==='add'){openDlg(null,curDay,{time:'',title:p.name,place:p.query,tag:p.tag,note:p.note});}
+});
 
 /* ---------- bookings / memo ---------- */
 function renderBk(){
