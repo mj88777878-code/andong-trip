@@ -521,14 +521,23 @@ function tmapBtn(query,name){
   return `<button type="button" class="btn ghost sm" style="text-decoration:none" data-tmap="${esc(query)}" data-tname="${esc(name||query)}">티맵</button>`;
 }
 function launchWithFallback(url,fallbackUrl){
-  let hidden=false;
-  const onHide=()=>{hidden=true;};
-  document.addEventListener('visibilitychange',onHide,{once:true});
+  let left=false;
+  const markLeft=()=>{left=true;};
+  document.addEventListener('visibilitychange',markLeft,{once:true});
+  window.addEventListener('pagehide',markLeft,{once:true});
+  window.addEventListener('blur',markLeft,{once:true});
+  const cleanup=()=>{
+    document.removeEventListener('visibilitychange',markLeft);
+    window.removeEventListener('pagehide',markLeft);
+    window.removeEventListener('blur',markLeft);
+  };
   window.location.href=url;
   setTimeout(()=>{
-    document.removeEventListener('visibilitychange',onHide);
-    if(!hidden&&fallbackUrl)window.open(fallbackUrl,'_blank','noopener');
-  },1200);
+    cleanup();
+    if(!left&&document.visibilityState!=='hidden'&&fallbackUrl){
+      window.open(fallbackUrl,'_blank','noopener');
+    }
+  },2500);
 }
 async function geocodeKR(q){
   const url='https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=kr&q='+encodeURIComponent(q);
