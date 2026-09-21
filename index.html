@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>안동 2박 3일 여행 대시보드</title>
+<meta name="description" content="9월 26일~28일 안동 여행 일정, 예산, 준비물, 예약을 한 곳에서 관리합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#eceeea; --surface:#f8f9f6; --line:#cfd4cc; --ink:#1b2430; --sub:#5a6470;
+  --indigo:#22406f; --indigo-ink:#f3f5f8; --red:#a8322a; --ochre:#b98220; --celadon:#4f7f70;
+  --chip:#e0e5df; --shadow:0 1px 0 rgba(27,36,48,.06);
+  --serif:"Noto Serif KR","Nanum Myeongjo",serif;
+  --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+:root[data-theme="dark"]{
+  --bg:#11161d; --surface:#1a212a; --line:#2c3642; --ink:#e7ebef; --sub:#98a3ae;
+  --indigo:#7fa1d8; --indigo-ink:#0f151c; --red:#e2776d; --ochre:#e0b256; --celadon:#86bfae;
+  --chip:#242d38; --shadow:none;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11161d; --surface:#1a212a; --line:#2c3642; --ink:#e7ebef; --sub:#98a3ae;
+    --indigo:#7fa1d8; --indigo-ink:#0f151c; --red:#e2776d; --ochre:#e0b256; --celadon:#86bfae;
+    --chip:#242d38; --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;font-size:15px;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--indigo)}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px}
+
+/* hero */
+.hero{position:relative;background:#1e3a66;color:#f3f5f8;overflow:hidden}
+:root[data-theme="dark"] .hero{background:#16233a}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero .wrap{position:relative;display:flex;flex-wrap:wrap;gap:24px 40px;align-items:flex-end;justify-content:space-between;padding-top:44px;padding-bottom:36px}
+.hero h1{font-family:var(--serif);font-weight:800;font-size:clamp(48px,11vw,104px);line-height:1;margin:0;letter-spacing:-.02em}
+.hero .sub{margin:14px 0 0;font-size:16px;opacity:.9;max-width:34em}
+.dates{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.dates span{border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:4px;font-size:14px}
+.dates b{font-family:var(--serif);font-size:18px;margin-right:4px}
+.count{text-align:right}
+.count .n{font-family:var(--serif);font-weight:800;font-size:clamp(56px,10vw,92px);line-height:1;color:#f1c96b}
+.count .l{font-size:14px;opacity:.85}
+.tools{position:absolute;top:12px;right:14px;display:flex;gap:6px;z-index:2}
+.tools button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;padding:4px 12px;cursor:pointer;font-size:13px}
+.tools button:hover{background:rgba(255,255,255,.22)}
+
+/* nav */
+nav.tabs{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:14px 14px 11px;cursor:pointer;white-space:nowrap;color:var(--sub);font-weight:600}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--red)}
+
+main{padding:24px 0 60px}
+.panel{display:none}
+.panel.on{display:block}
+h2{font-family:var(--serif);font-size:24px;margin:0 0 4px}
+h3{font-size:16px;margin:0 0 10px}
+.lead{color:var(--sub);margin:0 0 18px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:var(--shadow)}
+.card.flat{background:transparent}
+.muted{color:var(--sub)}
+.small{font-size:13px}
+
+/* buttons/inputs */
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:6px;padding:7px 14px;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn.sm{padding:3px 10px;font-size:13px}
+input[type=text],input[type=number],input[type=time],input[type=date],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px}
+textarea{min-height:120px;resize:vertical}
+label.f{display:block;font-size:13px;color:var(--sub);margin-bottom:10px}
+label.f>*:not(span){margin-top:4px;display:block}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1 1 120px}
+.row>.btn{flex:0 0 auto}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.pill{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:600}
+.pill[aria-pressed="true"]{background:var(--indigo);border-color:var(--indigo);color:var(--indigo-ink)}
+.tag{display:inline-block;font-size:12px;border-radius:4px;padding:1px 8px;background:var(--chip);color:var(--sub)}
+.tag.축제{background:var(--red);color:#fff}
+.tag.식사{background:var(--ochre);color:#fff}
+.tag.관람{background:var(--indigo);color:var(--indigo-ink)}
+.tag.이동{background:var(--celadon);color:#fff}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0 0 0 0}
+.tl li{display:grid;grid-template-columns:62px 22px 1fr;gap:0 10px;position:relative;padding-bottom:16px}
+.tl .t{font-family:var(--serif);font-weight:600;text-align:right;padding-top:2px}
+.tl .dot{position:relative}
+.tl .dot::before{content:"";position:absolute;left:10px;top:0;bottom:-16px;width:2px;background:var(--line)}
+.tl li:last-child .dot::before{display:none}
+.tl .dot input{position:relative;z-index:1;margin:4px 0 0 2px;width:18px;height:18px;accent-color:var(--red);cursor:pointer}
+.tl .body{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.tl li.done .body{opacity:.55}
+.tl li.done .ti{text-decoration:line-through}
+.tl .ti{font-weight:700}
+.tl .acts{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+.tl .acts a,.tl .acts button{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:2px 9px;background:transparent;cursor:pointer;text-decoration:none;color:var(--sub)}
+.tl .acts a:hover,.tl .acts button:hover{border-color:var(--ink);color:var(--ink)}
+.tl.dayline .acts{margin-top:6px}
+
+/* weather */
+.wx{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.wx div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 4px}
+.wx .ic{font-size:28px;line-height:1.2}
+.wx .d{font-weight:700}
+.wx .tp{font-size:13px}
+
+/* meters */
+.meter{height:8px;background:var(--chip);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--celadon);border-radius:99px;transition:width .3s}
+.meter.warn i{background:var(--red)}
+.big{font-family:var(--serif);font-weight:800;font-size:30px;line-height:1.2}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list .grow{flex:1;min-width:0}
+.x{background:none;border:0;color:var(--sub);cursor:pointer;font-size:16px;padding:2px 6px}
+.x:hover{color:var(--red)}
+.cat{display:grid;grid-template-columns:64px 1fr 92px;gap:10px;align-items:center;margin:8px 0;font-size:14px}
+.cat b{text-align:right;font-variant-numeric:tabular-nums}
+
+/* places */
+.place h3{margin-bottom:4px}
+.place p{margin:6px 0 12px}
+.place .acts{display:flex;gap:6px;flex-wrap:wrap}
+.pk-group{margin-top:12px}
+.pk-group h3{border-bottom:2px solid var(--ink);padding-bottom:4px;display:flex;justify-content:space-between}
+
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:22px;width:min(440px,92vw)}
+dialog::backdrop{background:rgba(10,14,20,.55)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.toast.on{opacity:1}
+footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);font-size:13px}
+.notice{border-left:4px solid var(--ochre);background:var(--surface);padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:14px}
+
+@media (max-width:560px){
+  .count{text-align:left}
+  .tl li{grid-template-columns:48px 20px 1fr;gap:0 6px}
+  .cat{grid-template-columns:52px 1fr 80px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  .tools,nav.tabs,.btn,.x,.acts,.hero canvas,.pills,form,.noprint{display:none!important}
+  .panel{display:block!important;break-inside:avoid;margin-bottom:24px}
+  body{background:#fff;color:#000}
+  .hero{background:#fff;color:#000}
+  .hero .count .n{color:#000}
+  .card,.tl .body{border-color:#999}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <canvas id="embers" aria-hidden="true"></canvas>
+  <div class="tools">
+    <button id="themeBtn" type="button" aria-label="화면 모드 전환">화면 모드</button>
+    <button id="printBtn" type="button">인쇄</button>
+  </div>
+  <div class="wrap">
+    <div>
+      <h1>안동 2박 3일</h1>
+      <p class="sub">탈춤페스티벌 기간에 떠나는 안동 여행. 일정, 예산, 준비물, 예약을 한 곳에서 관리하세요.</p>
+      <div class="dates">
+        <span><b>26</b>토</span><span><b>27</b>일</span><span><b>28</b>월</span>
+        <span>2026년 9월</span>
+      </div>
+    </div>
+    <div class="count">
+      <div class="n" id="dday">D-?</div>
+      <div class="l" id="ddayLabel"></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="대시보드 메뉴">
+  <div class="wrap" role="tablist">
+    <button role="tab" data-tab="home" aria-selected="true">개요</button>
+    <button role="tab" data-tab="plan" aria-selected="false">일정표</button>
+    <button role="tab" data-tab="budget" aria-selected="false">예산</button>
+    <button role="tab" data-tab="pack" aria-selected="false">준비물</button>
+    <button role="tab" data-tab="places" aria-selected="false">가볼 곳·먹을 곳</button>
+    <button role="tab" data-tab="info" aria-selected="false">예약·메모</button>
+    <button role="tab" data-tab="fest" aria-selected="false">축제 정보</button>
+    <button role="tab" data-tab="data" aria-selected="false">백업</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- 개요 -->
+<section class="panel on" id="p-home" role="tabpanel">
+  <div class="notice">9월 26일은 추석 연휴(24~26일)의 마지막 날이에요. 가게·관람 시설의 휴무와 도로 혼잡을 출발 전에 꼭 확인하세요. 28일은 월요일이라 휴관하는 박물관·전시관이 있을 수 있습니다.</div>
+  <div class="grid g2">
+    <div class="card">
+      <h3>다음 일정</h3>
+      <div id="nextUp"></div>
+    </div>
+    <div class="card">
+      <h3>안동 날씨 예보</h3>
+      <div class="wx" id="wx"><div class="muted small" style="grid-column:1/-1">불러오는 중…</div></div>
+      <p class="small muted" style="margin:10px 0 0" id="wxNote"></p>
+    </div>
+    <div class="card">
+      <h3>일정 진행률</h3>
+      <div class="big" id="planPct">0%</div>
+      <div class="meter" style="margin:8px 0"><i id="planBar" style="width:0"></i></div>
+      <div class="small muted" id="planTxt"></div>
+    </div>
+    <div class="card">
+      <h3>예산 현황</h3>
+      <div class="big" id="budSum">0원</div>
+      <div class="meter" style="margin:8px 0" id="budMeter"><i id="budBar" style="width:0"></i></div>
+      <div class="small muted" id="budTxt"></div>
+    </div>
+    <div class="card">
+      <h3>준비물 체크</h3>
+      <div class="big" id="packPct">0%</div>
+      <div class="meter" style="margin:8px 0"><i id="packBar" style="width:0"></i></div>
+      <div class="small muted" id="packTxt"></div>
+    </div>
+    <div class="card">
+      <h3>이번 여행의 핵심</h3>
+      <ul class="list small" style="font-size:14px">
+        <li><span class="tag 축제">축제</span><span class="grow">9/24~10/4 안동국제탈춤페스티벌</span></li>
+        <li><span class="tag 축제">26일</span><span class="grow">저녁 7시 선유줄불놀이 (만송정·부용대)</span></li>
+        <li><span class="tag 관람">유네스코</span><span class="grow">하회마을, 도산서원, 병산서원</span></li>
+        <li><span class="tag 식사">먹거리</span><span class="grow">찜닭, 간고등어, 헛제삿밥, 건진국수</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 일정표 -->
+<section class="panel" id="p-plan" role="tabpanel">
+  <h2>일정표</h2>
+  <p class="lead">체크하면 완료 처리됩니다. 초안이니 시간과 장소를 자유롭게 수정하세요.</p>
+  <div class="pills" id="dayPills"></div>
+  <div class="row noprint" style="margin-bottom:14px;justify-content:space-between">
+    <div class="muted" id="dayMeta" style="flex:1 1 auto"></div>
+    <button class="btn" type="button" id="addItem">일정 추가</button>
+  </div>
+  <ol class="tl" id="timeline"></ol>
+</section>
+
+<!-- 예산 -->
+<section class="panel" id="p-budget" role="tabpanel">
+  <h2>예산·정산</h2>
+  <p class="lead">쓴 돈을 기록하면 남은 예산과 1인당 금액을 자동으로 계산합니다.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>설정</h3>
+      <div class="row">
+        <label class="f"><span>총 예산(원)</span><input type="number" id="budTotal" min="0" step="10000"></label>
+        <label class="f"><span>인원</span><input type="number" id="people" min="1" step="1"></label>
+      </div>
+      <div class="big" id="budSpent">0원</div>
+      <div class="muted small" id="budLeft"></div>
+      <div id="catBars" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <h3>지출 추가</h3>
+      <form id="expForm">
+        <div class="row">
+          <label class="f"><span>날짜</span><select id="expDate"><option value="2026-09-26">9/26 토</option><option value="2026-09-27">9/27 일</option><option value="2026-09-28">9/28 월</option><option value="before">여행 전</option></select></label>
+          <label class="f"><span>분류</span><select id="expCat"><option>교통</option><option>숙박</option><option>식비</option><option>입장·체험</option><option>쇼핑</option><option>기타</option></select></label>
+        </div>
+        <div class="row">
+          <label class="f"><span>내용</span><input type="text" id="expName" placeholder="예: 안동찜닭" required></label>
+          <label class="f"><span>금액(원)</span><input type="number" id="expAmt" min="0" step="100" required></label>
+          <button class="btn" type="submit" style="margin-bottom:10px">추가</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>지출 내역</h3>
+    <ul class="list" id="expList"></ul>
+  </div>
+</section>
+
+<!-- 준비물 -->
+<section class="panel" id="p-pack" role="tabpanel">
+  <h2>준비물</h2>
+  <p class="lead">챙긴 것은 체크하세요. 가을 아침저녁은 쌀쌀할 수 있으니 겉옷을 권합니다.</p>
+  <div class="card noprint" style="margin-bottom:16px">
+    <form id="packForm" class="row">
+      <label class="f"><span>분류</span><select id="packGroup"></select></label>
+      <label class="f" style="flex:3 1 200px"><span>준비물</span><input type="text" id="packText" placeholder="예: 보조배터리" required></label>
+      <button class="btn" type="submit" style="margin-bottom:10px">추가</button>
+    </form>
+  </div>
+  <div class="meter" style="margin-bottom:6px"><i id="packBar2" style="width:0"></i></div>
+  <div class="small muted" id="packTxt2" style="margin-bottom:6px"></div>
+  <div id="packLists"></div>
+</section>
+
+<!-- 장소 -->
+<section class="panel" id="p-places" role="tabpanel">
+  <h2>가볼 곳·먹을 곳</h2>
+  <p class="lead">"일정에 넣기"를 누르면 원하는 날짜의 일정표에 바로 추가됩니다. 영업시간·휴무일은 방문 전 지도 앱에서 확인하세요.</p>
+  <div class="pills" id="placeFilter"></div>
+  <div class="grid g3" id="placeGrid"></div>
+</section>
+
+<!-- 예약·메모 -->
+<section class="panel" id="p-info" role="tabpanel">
+  <h2>예약·메모</h2>
+  <p class="lead">교통편, 숙소, 식당 예약 정보와 자유 메모를 적어 두세요.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>예약 추가</h3>
+      <form id="bkForm">
+        <div class="row">
+          <label class="f"><span>종류</span><select id="bkType"><option>교통</option><option>숙소</option><option>식당</option><option>입장권</option><option>기타</option></select></label>
+          <label class="f" style="flex:2 1 160px"><span>이름</span><input type="text" id="bkTitle" placeholder="예: KTX 청량리→안동" required></label>
+        </div>
+        <div class="row">
+          <label class="f"><span>일시</span><input type="text" id="bkWhen" placeholder="예: 9/26 09:10 출발"></label>
+          <label class="f"><span>예약번호</span><input type="text" id="bkRef"></label>
+        </div>
+        <label class="f"><span>메모</span><input type="text" id="bkMemo" placeholder="주소, 연락처, 체크인 시간 등"></label>
+        <button class="btn" type="submit">추가</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>자유 메모</h3>
+      <textarea id="memo" placeholder="주차 정보, 살 물건, 동행자에게 전달할 내용 등"></textarea>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>예약 목록</h3>
+    <ul class="list" id="bkList"></ul>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>바로가기</h3>
+    <div class="acts" style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.letskorail.com">코레일 승차권</a>
+      <a class="btn ghost sm" target="_blank" rel="noopener" href="https://map.naver.com/p/search/안동역">네이버 지도</a>
+      <a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.weather.go.kr">기상청</a>
+      <a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.maskdance.com">탈춤페스티벌 공식</a>
+    </div>
+    <p class="small muted" style="margin:12px 0 0">긴급: 119(응급·화재), 112(경찰), 1330(관광 안내, 한국관광공사)</p>
+  </div>
+</section>
+
+<!-- 축제 -->
+<section class="panel" id="p-fest" role="tabpanel">
+  <h2>2026 안동국제탈춤페스티벌</h2>
+  <p class="lead">주제는 "가면의 기억, 모두의 춤"입니다. 9월 24일부터 10월 4일까지 11일간 열립니다.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>개요</h3>
+      <ul class="list" style="font-size:14px">
+        <li><span class="grow">장소</span><span>중앙선1942안동역, 탈춤공원, 원도심, 하회마을</span></li>
+        <li><span class="grow">참가</span><span>23개국 27개 해외공연단, 국내 전통탈춤 17개 단체, 마당극·창작극 10개 팀</span></li>
+        <li><span class="grow">문의</span><span>054-840-3424</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>우리 일정과 겹치는 하이라이트</h3>
+      <ul class="list" style="font-size:14px">
+        <li><span class="tag 축제">9/26 토</span><span class="grow">저녁 7시 선유줄불놀이. 만송정·부용대에서 줄불, 낙화, 달걀불, 뱃놀이가 펼쳐집니다.</span></li>
+        <li><span class="tag 축제">기간 중</span><span class="grow">세계창작탈공모전 수상작 약 400점 전시, 하회별신굿탈놀이 공연</span></li>
+      </ul>
+    </div>
+  </div>
+  <p class="small muted" style="margin-top:14px">출처: 안동시 보도자료 및 언론 보도(2026.9.17~20), 공식 사이트. 공연 시간표와 하회마을 셔틀·교통 통제는 공식 사이트에서 최종 확인하세요.</p>
+</section>
+
+<!-- 백업 -->
+<section class="panel" id="p-data" role="tabpanel">
+  <h2>백업·복원</h2>
+  <p class="lead">입력한 내용은 이 브라우저(localStorage)에만 저장됩니다. 다른 기기와 공유하려면 파일로 내보내고 불러오세요.</p>
+  <div class="card">
+    <div class="row" style="align-items:center">
+      <button class="btn" type="button" id="exportBtn">내보내기(JSON)</button>
+      <button class="btn ghost" type="button" id="importBtn">불러오기</button>
+      <button class="btn red" type="button" id="resetBtn">초기화</button>
+      <input type="file" id="importFile" accept="application/json" hidden>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">안동 여행 대시보드. 정보는 방문 전 공식 채널에서 다시 확인해 주세요.</div></footer>
+
+<dialog id="dlg">
+  <form method="dialog" id="itemForm">
+    <h3 id="dlgTitle">일정 추가</h3>
+    <div class="row">
+      <label class="f"><span>날짜</span><select id="fDay"><option value="0">9/26 토</option><option value="1">9/27 일</option><option value="2">9/28 월</option></select></label>
+      <label class="f"><span>시간</span><input type="time" id="fTime" required></label>
+    </div>
+    <label class="f"><span>제목</span><input type="text" id="fTitle" required></label>
+    <label class="f"><span>장소(지도 검색어)</span><input type="text" id="fPlace"></label>
+    <label class="f"><span>분류</span><select id="fTag"><option>관람</option><option>식사</option><option>이동</option><option>축제</option><option>휴식</option></select></label>
+    <label class="f"><span>메모</span><input type="text" id="fNote"></label>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn ghost" type="button" id="dlgCancel">취소</button>
+      <button class="btn" type="submit">저장</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='andong-trip-2026-v1';
+const DAYS=['2026-09-26','2026-09-27','2026-09-28'];
+const DAYLBL=['9/26 토','9/27 일','9/28 월'];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const mapUrl=q=>'https://map.naver.com/p/search/'+encodeURIComponent(q);
+
+/* ---------- default data ---------- */
+function mk(time,title,place,tag,note){return {id:uid(),time,title,place,tag,note:note||'',done:false};}
+function defaults(){
+  return {
+    plan:[
+      [
+        mk('11:30','안동 도착, 짐 맡기기','안동역','이동','추석 연휴 끝이라 도로·주차가 혼잡할 수 있어요. 숙소에 먼저 짐을 맡기면 편합니다.'),
+        mk('12:30','안동찜닭 점심','안동 구시장 찜닭골목','식사','연휴 휴무·대기 여부를 미리 확인하세요.'),
+        mk('14:00','탈춤공원 축제 구경','탈춤공원','축제','세계탈놀이, 공연, 체험 부스. 공연 시간표는 공식 사이트에서 확인.'),
+        mk('16:00','하회마을 산책·별신굿탈놀이','하회마을','관람','축제 기간 셔틀·교통 통제를 확인하세요.'),
+        mk('18:00','저녁 식사','하회마을 식당','식사','줄불놀이 전에 미리 식사하는 것을 권합니다.'),
+        mk('19:00','선유줄불놀이','부용대','축제','9/26 오후 7시 만송정·부용대 일원. 줄불, 낙화, 달걀불, 뱃놀이.'),
+        mk('20:30','숙소 체크인','안동 숙소','휴식','')
+      ],
+      [
+        mk('09:00','조식, 체크아웃 준비','','휴식',''),
+        mk('10:00','월영교·안동호 산책','월영교','관람','나무로 만든 보행교. 아침 산책하기 좋아요.'),
+        mk('11:30','안동민속박물관','안동민속박물관','관람','운영 시간 확인.'),
+        mk('12:30','헛제삿밥 또는 건진국수','안동 헛제삿밥','식사','대표 안동 향토음식.'),
+        mk('14:00','도산서원','도산서원','관람','퇴계 이황을 모신 서원. 낙동강변 풍경도 함께.'),
+        mk('16:30','카페·빵집 휴식','맘모스제과','식사','안동 명물 맘모스빵.'),
+        mk('18:00','저녁 식사','안동 간고등어 식당','식사','안동간고등어 구이 정식 등.'),
+        mk('19:30','탈춤공원 밤 공연','탈춤공원','축제','야간 공연·대동난장. 시간표 확인.')
+      ],
+      [
+        mk('09:30','체크아웃','','이동','짐은 차량이나 숙소 보관소에.'),
+        mk('10:30','병산서원','병산서원','관람','유네스코 세계유산. 만대루에서 보는 병산과 낙동강.'),
+        mk('12:30','점심 식사','안동 국시','식사',''),
+        mk('14:00','구시장 선물 쇼핑','안동 구시장','식사','간고등어, 안동소주, 맘모스빵 등.'),
+        mk('15:30','안동 출발','안동역','이동','귀갓길 혼잡을 감안해 여유 있게.')
+      ]
+    ],
+    budget:500000, people:2, expenses:[],
+    packing:[
+      ['필수','신분증'],['필수','예매 내역(교통·숙소)'],['필수','휴대폰 충전기, 보조배터리'],['필수','카드·현금 조금'],
+      ['옷·용품','얇은 겉옷(아침저녁 쌀쌀)'],['옷·용품','편한 운동화'],['옷·용품','우산 또는 우비'],['옷·용품','세면도구'],
+      ['축제·야외','돗자리·접이식 방석'],['축제·야외','모자, 선크림'],['축제·야외','물티슈, 마스크'],['축제·야외','손난로 또는 담요(밤 공연)'],
+      ['건강','상비약(소화제, 진통제, 밴드)'],['건강','편한 양말, 갈아 신을 양말']
+    ].map(([g,t])=>({id:uid(),group:g,text:t,done:false})),
+    bookings:[], memo:''
+  };
+}
+let S=load();
+function load(){
+  try{const r=localStorage.getItem(KEY);if(r){return Object.assign(defaults(),JSON.parse(r));}}catch(e){}
+  return defaults();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+let toastT;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),1800);}
+
+/* ---------- theme ---------- */
+function applyTheme(t){if(t)document.documentElement.setAttribute('data-theme',t);}
+try{applyTheme(localStorage.getItem('andong-theme'));}catch(e){}
+$('#themeBtn').onclick=()=>{
+  const cur=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  const nx=cur==='dark'?'light':'dark';applyTheme(nx);try{localStorage.setItem('andong-theme',nx);}catch(e){}
+};
+$('#printBtn').onclick=()=>window.print();
+
+/* ---------- tabs ---------- */
+function showTab(id){
+  $$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+id));
+  $$('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));
+  try{sessionStorage.setItem('andong-tab',id);}catch(e){}
+  window.scrollTo({top:Math.min(window.scrollY,$('nav.tabs').offsetTop),behavior:'auto'});
+}
+$$('nav.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+try{const t=sessionStorage.getItem('andong-tab');if(t&&$('#p-'+t))showTab(t);}catch(e){}
+
+/* ---------- date helpers ---------- */
+function kstNow(){const d=new Date(Date.now()+9*3600e3);return {date:d.toISOString().slice(0,10),time:d.toISOString().slice(11,16)};}
+function dayDiff(a,b){return Math.round((new Date(b+'T00:00:00Z')-new Date(a+'T00:00:00Z'))/864e5);}
+function renderDday(){
+  const n=kstNow();const d=dayDiff(n.date,DAYS[0]);const el=$('#dday'),lb=$('#ddayLabel');
+  if(d>0){el.textContent='D-'+d;lb.textContent='출발까지 '+d+'일';}
+  else if(n.date<=DAYS[2]){el.textContent=(-d+1)+'일차';lb.textContent='여행 중입니다';}
+  else{el.textContent='완료';lb.textContent='여행이 끝났어요. 수고하셨습니다!';}
+}
+
+/* ---------- itinerary ---------- */
+let curDay=0;
+(function initDay(){const n=kstNow().date;const i=DAYS.indexOf(n);if(i>=0)curDay=i;})();
+function sortDay(i){S.plan[i].sort((a,b)=>a.time.localeCompare(b.time));}
+function renderPills(){
+  $('#dayPills').innerHTML=DAYLBL.map((l,i)=>`<button class="pill" type="button" data-d="${i}" aria-pressed="${i===curDay}">${l}</button>`).join('');
+  $$('#dayPills .pill').forEach(b=>b.onclick=()=>{curDay=+b.dataset.d;renderPlan();});
+}
+const DAYMETA=['추석 연휴 마지막 날 · 선유줄불놀이 19:00','도산서원과 월영교 중심의 유교 문화 하루','월요일 · 휴관 여부 확인 후 병산서원과 쇼핑'];
+function renderPlan(){
+  renderPills();
+  sortDay(curDay);
+  $('#dayMeta').textContent=DAYMETA[curDay];
+  const items=S.plan[curDay];
+  $('#timeline').innerHTML=items.length?items.map(it=>`
+    <li class="${it.done?'done':''}" data-id="${it.id}">
+      <div class="t">${esc(it.time)}</div>
+      <div class="dot"><input type="checkbox" ${it.done?'checked':''} aria-label="${esc(it.title)} 완료"></div>
+      <div class="body">
+        <div><span class="ti">${esc(it.title)}</span> <span class="tag ${esc(it.tag)}">${esc(it.tag)}</span></div>
+        ${it.note?`<div class="small muted">${esc(it.note)}</div>`:''}
+        <div class="acts">
+          ${it.place?`<a href="${mapUrl(it.place)}" target="_blank" rel="noopener">지도 보기</a>`:''}
+          <button type="button" data-act="edit">수정</button>
+          <button type="button" data-act="del">삭제</button>
+        </div>
+      </div>
+    </li>`).join(''):'<li class="muted" style="display:block">일정이 없습니다. "일정 추가"를 눌러 채워 보세요.</li>';
+  save();renderStats();
+}
+$('#timeline').addEventListener('click',e=>{
+  const li=e.target.closest('li[data-id]');if(!li)return;
+  const it=S.plan[curDay].find(x=>x.id===li.dataset.id);if(!it)return;
+  if(e.target.matches('input[type=checkbox]')){it.done=e.target.checked;renderPlan();}
+  else if(e.target.dataset.act==='edit'){openDlg(it,curDay);}
+  else if(e.target.dataset.act==='del'){if(confirm('"'+it.title+'" 일정을 삭제할까요?')){S.plan[curDay]=S.plan[curDay].filter(x=>x!==it);renderPlan();toast('삭제했어요');}}
+});
+
+/* dialog */
+const dlg=$('#dlg');let editing=null;
+function openDlg(it,day,prefill){
+  editing=it||null;
+  $('#dlgTitle').textContent=it?'일정 수정':'일정 추가';
+  $('#fDay').value=String(day);
+  $('#fTime').value=it?it.time:(prefill&&prefill.time)||'12:00';
+  $('#fTitle').value=it?it.title:(prefill&&prefill.title)||'';
+  $('#fPlace').value=it?it.place:(prefill&&prefill.place)||'';
+  $('#fTag').value=it?it.tag:(prefill&&prefill.tag)||'관람';
+  $('#fNote').value=it?it.note:(prefill&&prefill.note)||'';
+  if(typeof dlg.showModal==='function')dlg.showModal();else dlg.setAttribute('open','');
+}
+$('#addItem').onclick=()=>openDlg(null,curDay);
+$('#dlgCancel').onclick=()=>dlg.close();
+$('#itemForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const day=+$('#fDay').value;
+  const data={time:$('#fTime').value,title:$('#fTitle').value.trim(),place:$('#fPlace').value.trim(),tag:$('#fTag').value,note:$('#fNote').value.trim()};
+  if(!data.title)return;
+  if(editing){
+    S.plan.forEach((arr,i)=>{const k=arr.indexOf(editing);if(k>=0)arr.splice(k,1);});
+    S.plan[day].push(Object.assign(editing,data));
+  }else{S.plan[day].push(Object.assign({id:uid(),done:false},data));}
+  curDay=day;dlg.close();renderPlan();toast('저장했어요');
+});
+
+/* ---------- stats / home ---------- */
+function renderStats(){
+  const all=S.plan.flat();const done=all.filter(x=>x.done).length;
+  const pct=all.length?Math.round(done/all.length*100):0;
+  $('#planPct').textContent=pct+'%';$('#planBar').style.width=pct+'%';
+  $('#planTxt').textContent=`전체 ${all.length}개 중 ${done}개 완료`;
+  // next up
+  const n=kstNow();let day=DAYS.indexOf(n.date);let target=null,label='';
+  if(n.date>DAYS[2]){label='여행이 끝났어요.';}
+  else{
+    if(day<0)day=0;
+    const list=S.plan[day].filter(x=>!x.done);
+    target=(n.date===DAYS[day]?list.find(x=>x.time>=n.time):null)||list[0];
+    if(!target){for(let d=day+1;d<3&&!target;d++)target=S.plan[d].find(x=>!x.done);if(target)day=S.plan.findIndex(a=>a.includes(target));}
+  }
+  $('#nextUp').innerHTML=target?`
+    <div class="muted small">${DAYLBL[day]} ${esc(target.time)}</div>
+    <div class="big" style="font-size:24px;margin:2px 0 6px">${esc(target.title)}</div>
+    <div class="small muted">${esc(target.note)}</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      ${target.place?`<a class="btn ghost sm" href="${mapUrl(target.place)}" target="_blank" rel="noopener" style="text-decoration:none">지도 보기</a>`:''}
+      <button class="btn ghost sm" type="button" id="goPlan">일정표 열기</button>
+    </div>`:`<div class="muted">${label||'남은 일정이 없습니다.'}</div>`;
+  const g=$('#goPlan');if(g)g.onclick=()=>{curDay=day;renderPlan();showTab('plan');};
+  // budget
+  const spent=S.expenses.reduce((a,b)=>a+b.amount,0);
+  $('#budSum').textContent=won(spent);
+  const bp=S.budget>0?Math.min(100,spent/S.budget*100):0;
+  $('#budBar').style.width=bp+'%';$('#budMeter').classList.toggle('warn',S.budget>0&&spent>S.budget);
+  $('#budTxt').textContent=S.budget>0?(spent>S.budget?`예산을 ${won(spent-S.budget)} 초과했어요`:`예산 ${won(S.budget)} 중 ${won(S.budget-spent)} 남음`):'예산을 설정해 보세요';
+  // packing
+  const pk=S.packing.filter(x=>x.done).length;const pp=S.packing.length?Math.round(pk/S.packing.length*100):0;
+  $('#packPct').textContent=pp+'%';$('#packBar').style.width=pp+'%';$('#packTxt').textContent=`${S.packing.length}개 중 ${pk}개 챙김`;
+  $('#packBar2').style.width=pp+'%';$('#packTxt2').textContent=`${S.packing.length}개 중 ${pk}개 챙김 (${pp}%)`;
+}
+
+/* ---------- budget ---------- */
+const CATS=['교통','숙박','식비','입장·체험','쇼핑','기타'];
+function renderBudget(){
+  $('#budTotal').value=S.budget;$('#people').value=S.people;
+  const spent=S.expenses.reduce((a,b)=>a+b.amount,0);
+  $('#budSpent').textContent=won(spent);
+  $('#budLeft').textContent=`남은 예산 ${won(S.budget-spent)} · 1인당 ${won(spent/Math.max(1,S.people))}`;
+  const max=Math.max(1,...CATS.map(c=>S.expenses.filter(e=>e.cat===c).reduce((a,b)=>a+b.amount,0)));
+  $('#catBars').innerHTML=CATS.map(c=>{const v=S.expenses.filter(e=>e.cat===c).reduce((a,b)=>a+b.amount,0);
+    return `<div class="cat"><span>${c}</span><div class="meter"><i style="width:${v/max*100}%"></i></div><b>${won(v)}</b></div>`;}).join('');
+  const label=d=>d==='before'?'여행 전':DAYLBL[DAYS.indexOf(d)];
+  const ex=[...S.expenses].sort((a,b)=>(a.date==='before'?'0':a.date).localeCompare(b.date==='before'?'0':b.date));
+  $('#expList').innerHTML=ex.length?ex.map(e=>`<li data-id="${e.id}"><span class="tag">${esc(label(e.date))}</span><span class="tag">${esc(e.cat)}</span><span class="grow">${esc(e.name)}</span><b>${won(e.amount)}</b><button class="x" type="button" aria-label="삭제">×</button></li>`).join(''):'<li class="muted">아직 기록한 지출이 없어요.</li>';
+  save();renderStats();
+}
+$('#budTotal').addEventListener('input',e=>{S.budget=Math.max(0,+e.target.value||0);save();renderBudgetSummaryOnly();});
+$('#people').addEventListener('input',e=>{S.people=Math.max(1,+e.target.value||1);save();renderBudgetSummaryOnly();});
+function renderBudgetSummaryOnly(){const spent=S.expenses.reduce((a,b)=>a+b.amount,0);$('#budLeft').textContent=`남은 예산 ${won(S.budget-spent)} · 1인당 ${won(spent/Math.max(1,S.people))}`;renderStats();}
+$('#expForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  S.expenses.push({id:uid(),date:$('#expDate').value,cat:$('#expCat').value,name:$('#expName').value.trim(),amount:Math.max(0,+$('#expAmt').value||0)});
+  $('#expName').value='';$('#expAmt').value='';renderBudget();toast('지출을 추가했어요');
+});
+$('#expList').addEventListener('click',e=>{
+  if(!e.target.classList.contains('x'))return;
+  const id=e.target.closest('li').dataset.id;S.expenses=S.expenses.filter(x=>x.id!==id);renderBudget();
+});
+
+/* ---------- packing ---------- */
+const PGROUPS=['필수','옷·용품','축제·야외','건강','기타'];
+$('#packGroup').innerHTML=PGROUPS.map(g=>`<option>${g}</option>`).join('');
+function renderPack(){
+  $('#packLists').innerHTML=PGROUPS.map(g=>{
+    const items=S.packing.filter(p=>p.group===g);if(!items.length)return '';
+    const d=items.filter(i=>i.done).length;
+    return `<div class="pk-group card"><h3><span>${g}</span><span class="muted small">${d}/${items.length}</span></h3><ul class="list">${items.map(i=>`<li data-id="${i.id}"><input type="checkbox" ${i.done?'checked':''} aria-label="${esc(i.text)}" style="accent-color:var(--red);width:18px;height:18px"><span class="grow" style="${i.done?'text-decoration:line-through;opacity:.55':''}">${esc(i.text)}</span><button class="x" type="button" aria-label="삭제">×</button></li>`).join('')}</ul></div>`;
+  }).join('');
+  save();renderStats();
+}
+$('#packLists').addEventListener('click',e=>{
+  const li=e.target.closest('li[data-id]');if(!li)return;const it=S.packing.find(x=>x.id===li.dataset.id);if(!it)return;
+  if(e.target.matches('input[type=checkbox]')){it.done=e.target.checked;renderPack();}
+  else if(e.target.classList.contains('x')){S.packing=S.packing.filter(x=>x!==it);renderPack();}
+});
+$('#packForm').addEventListener('submit',e=>{
+  e.preventDefault();S.packing.push({id:uid(),group:$('#packGroup').value,text:$('#packText').value.trim(),done:false});
+  $('#packText').value='';renderPack();
+});
+
+/* ---------- places ---------- */
+const PLACES=[
+  {n:'하회마을',c:'명소',d:'유네스코 세계유산 마을. 낙동강이 감싸 흐르는 풍경과 하회별신굿탈놀이.',q:'하회마을',t:'16:00',tag:'관람'},
+  {n:'월영교',c:'명소',d:'안동호 위 나무 보행교. 낮 산책과 저녁 조명 모두 좋아요.',q:'월영교',t:'10:00',tag:'관람'},
+  {n:'도산서원',c:'명소',d:'퇴계 이황의 학문이 깃든 서원. 강변 풍경과 함께 천천히 걷기 좋아요.',q:'도산서원',t:'14:00',tag:'관람'},
+  {n:'병산서원',c:'명소',d:'만대루에서 병산과 낙동강을 바라보는 유네스코 세계유산 서원.',q:'병산서원',t:'10:30',tag:'관람'},
+  {n:'부용대',c:'명소',d:'하회마을 전경을 내려다보는 전망 명소. 선유줄불놀이 무대 일원.',q:'부용대',t:'18:30',tag:'관람'},
+  {n:'탈춤공원',c:'명소',d:'안동국제탈춤페스티벌의 중심 무대.',q:'탈춤공원',t:'14:00',tag:'축제'},
+  {n:'봉정사',c:'명소',d:'유네스코 세계유산 산사. 여유가 있으면 대안 코스로.',q:'봉정사',t:'15:00',tag:'관람'},
+  {n:'안동민속박물관',c:'명소',d:'월영교 인근 박물관. 월요일 휴관 여부 확인.',q:'안동민속박물관',t:'11:30',tag:'관람'},
+  {n:'안동찜닭골목',c:'먹거리',d:'구시장 안 찜닭 가게가 모인 골목. 안동 대표 음식.',q:'안동 구시장 찜닭골목',t:'12:30',tag:'식사'},
+  {n:'헛제삿밥',c:'먹거리',d:'제사 음식을 비빔밥처럼 먹는 안동 향토식.',q:'안동 헛제삿밥',t:'12:30',tag:'식사'},
+  {n:'안동간고등어',c:'먹거리',d:'염장한 고등어를 구워 내는 정식. 간이 잘 밴 맛.',q:'안동 간고등어 정식',t:'18:00',tag:'식사'},
+  {n:'건진국수',c:'먹거리',d:'콩가루를 넣은 면과 멸치 육수의 안동식 국수.',q:'안동 건진국수',t:'12:30',tag:'식사'},
+  {n:'맘모스제과',c:'먹거리',d:'안동을 대표하는 빵집. 맘모스빵이 유명해요.',q:'맘모스제과 안동',t:'16:30',tag:'식사'},
+  {n:'안동 구시장',c:'먹거리',d:'간고등어, 안동소주 등 선물과 길거리 먹거리.',q:'안동 구시장',t:'14:00',tag:'식사'}
+];
+let pf='전체';
+function renderPlaces(){
+  $('#placeFilter').innerHTML=['전체','명소','먹거리'].map(f=>`<button type="button" class="pill" data-f="${f}" aria-pressed="${f===pf}">${f}</button>`).join('');
+  $$('#placeFilter .pill').forEach(b=>b.onclick=()=>{pf=b.dataset.f;renderPlaces();});
+  $('#placeGrid').innerHTML=PLACES.map((p,i)=>({p,i})).filter(o=>pf==='전체'||o.p.c===pf).map(({p,i})=>`
+    <div class="card place"><span class="tag ${p.tag}">${p.c}</span><h3 style="margin-top:8px">${esc(p.n)}</h3><p class="small muted">${esc(p.d)}</p>
+    <div class="acts"><a class="btn ghost sm" style="text-decoration:none" href="${mapUrl(p.q)}" target="_blank" rel="noopener">지도</a><button class="btn sm" type="button" data-i="${i}">일정에 넣기</button></div></div>`).join('');
+  $$('#placeGrid .btn[data-i]').forEach(b=>b.onclick=()=>{const p=PLACES[+b.dataset.i];openDlg(null,curDay,{time:p.t,title:p.n,place:p.q,tag:p.tag,note:p.d});});
+}
+
+/* ---------- bookings / memo ---------- */
+function renderBk(){
+  $('#bkList').innerHTML=S.bookings.length?S.bookings.map(b=>`<li data-id="${b.id}"><span class="tag">${esc(b.type)}</span><span class="grow"><b>${esc(b.title)}</b>${b.when?` <span class="muted small">${esc(b.when)}</span>`:''}${b.ref?` <span class="small">예약번호 ${esc(b.ref)}</span>`:''}${b.memo?`<div class="small muted">${esc(b.memo)}</div>`:''}</span><button class="x" type="button" aria-label="삭제">×</button></li>`).join(''):'<li class="muted">등록한 예약이 없습니다.</li>';
+  save();
+}
+$('#bkForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  S.bookings.push({id:uid(),type:$('#bkType').value,title:$('#bkTitle').value.trim(),when:$('#bkWhen').value.trim(),ref:$('#bkRef').value.trim(),memo:$('#bkMemo').value.trim()});
+  ['#bkTitle','#bkWhen','#bkRef','#bkMemo'].forEach(s=>$(s).value='');renderBk();toast('예약 정보를 추가했어요');
+});
+$('#bkList').addEventListener('click',e=>{if(e.target.classList.contains('x')){const id=e.target.closest('li').dataset.id;S.bookings=S.bookings.filter(b=>b.id!==id);renderBk();}});
+$('#memo').value=S.memo;
+$('#memo').addEventListener('input',e=>{S.memo=e.target.value;save();});
+
+/* ---------- backup ---------- */
+$('#exportBtn').onclick=()=>{
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='andong-trip-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$('#importBtn').onclick=()=>$('#importFile').click();
+$('#importFile').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.plan||!Array.isArray(d.plan))throw 0;S=Object.assign(defaults(),d);save();renderAll();$('#memo').value=S.memo;toast('불러왔어요');}catch(err){alert('올바른 백업 파일이 아니에요.');}};
+  r.readAsText(f);e.target.value='';
+};
+$('#resetBtn').onclick=()=>{if(confirm('모든 입력을 지우고 처음 상태로 되돌릴까요?')){S=defaults();save();renderAll();$('#memo').value='';toast('초기화했어요');}};
+
+/* ---------- weather (Open-Meteo, 키 불필요) ---------- */
+const WMO=c=>{
+  if(c===0)return['☀️','맑음'];if(c<=2)return['🌤️','구름 조금'];if(c===3)return['☁️','흐림'];
+  if(c===45||c===48)return['🌫️','안개'];if(c>=51&&c<=57)return['🌦️','이슬비'];if(c>=61&&c<=67)return['🌧️','비'];
+  if(c>=71&&c<=77)return['🌨️','눈'];if(c>=80&&c<=82)return['🌦️','소나기'];if(c>=95)return['⛈️','뇌우'];return['🌥️','구름'];
+};
+async function loadWeather(){
+  const box=$('#wx');
+  try{
+    const u='https://api.open-meteo.com/v1/forecast?latitude=36.5684&longitude=128.7294&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FSeoul&start_date=2026-09-26&end_date=2026-09-28';
+    const r=await fetch(u);if(!r.ok)throw 0;const j=await r.json();const d=j.daily;
+    box.innerHTML=d.time.map((t,i)=>{const [ic,tx]=WMO(d.weather_code[i]);
+      return `<div><div class="d">${DAYLBL[i]}</div><div class="ic">${ic}</div><div class="tp">${Math.round(d.temperature_2m_min[i])}° / ${Math.round(d.temperature_2m_max[i])}°</div><div class="small muted">${tx} · 강수 ${d.precipitation_probability_max[i]==null?'-':d.precipitation_probability_max[i]+'%'}</div></div>`;}).join('');
+    $('#wxNote').textContent='Open-Meteo 예보 기준. 출발 전 기상청에서 다시 확인하세요.';
+  }catch(e){
+    box.innerHTML='<div class="small muted" style="grid-column:1/-1;text-align:left">예보를 불러오지 못했어요. 아직 예보 범위 밖이거나 네트워크 문제일 수 있습니다. <a href="https://www.weather.go.kr" target="_blank" rel="noopener">기상청</a>에서 확인하세요.</div>';
+  }
+}
+
+/* ---------- embers (낙화 모티프) ---------- */
+(function(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const cv=$('#embers');const ctx=cv.getContext('2d');let w,h,P=[];
+  function size(){w=cv.width=cv.offsetWidth;h=cv.height=cv.offsetHeight;}
+  size();addEventListener('resize',size);
+  const N=Math.min(36,Math.floor(w/28));
+  for(let i=0;i<N;i++)P.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.8+.6,v:Math.random()*.5+.25,s:Math.random()*Math.PI*2,a:Math.random()*.5+.3});
+  function tick(){
+    ctx.clearRect(0,0,w,h);
+    P.forEach(p=>{p.y+=p.v;p.s+=.02;p.x+=Math.sin(p.s)*.35;if(p.y>h+4){p.y=-4;p.x=Math.random()*w;}
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle='rgba(241,201,107,'+p.a+')';ctx.fill();});
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ---------- init ---------- */
+function renderAll(){renderDday();renderPlan();renderBudget();renderPack();renderPlaces();renderBk();}
+renderAll();loadWeather();
+setInterval(()=>{renderDday();renderStats();},60000);
+})();
+</script>
+</body>
+</html>
