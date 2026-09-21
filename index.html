@@ -119,6 +119,9 @@ label.f>*:not(span){margin-top:4px;display:block}
 .tl .ti{font-weight:700}
 .tl .acts{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
 .tl .acts a,.tl .acts button{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:2px 9px;background:transparent;cursor:pointer;text-decoration:none;color:var(--sub)}
+#p-plan{touch-action:pan-y}
+@keyframes tlSlide{from{opacity:0;transform:translateX(var(--slide,14px))}to{opacity:1;transform:translateX(0)}}
+#timeline.anim{animation:tlSlide .22s ease}
 .tl .acts a:hover,.tl .acts button:hover{border-color:var(--ink);color:var(--ink)}
 .tl.dayline .acts{margin-top:6px}
 
@@ -731,12 +734,14 @@ function renderPills(){
   $$('#dayPills .pill').forEach(b=>b.onclick=()=>{curDay=+b.dataset.d;renderPlan();});
 }
 const DAYMETA=['부산 출발 · 하회마을·탈빙고·목석원·선유줄불놀이','안동민속촌·도산서원·월영교, 맘모스 빵집','아직 등록된 일정이 없어요 · "일정 추가"로 채워보세요'];
-function renderPlan(){
+function renderPlan(dir){
   renderPills();
   sortDay(curDay);
   $('#dayMeta').textContent=DAYMETA[curDay];
   const items=S.plan[curDay];
-  $('#timeline').innerHTML=items.length?items.map(it=>`
+  const tl=$('#timeline');
+  tl.style.setProperty('--slide',dir==='prev'?'-14px':'14px');
+  tl.innerHTML=items.length?items.map(it=>`
     <li class="${it.done?'done':''}" data-id="${it.id}">
       <div class="t">${esc(it.time)}</div>
       <div class="dot"><input type="checkbox" ${it.done?'checked':''} aria-label="${esc(it.title)} 완료"></div>
@@ -750,8 +755,26 @@ function renderPlan(){
         </div>
       </div>
     </li>`).join(''):'<li class="muted" style="display:block">일정이 없습니다. "일정 추가"를 눌러 채워 보세요.</li>';
+  tl.classList.remove('anim');void tl.offsetWidth;tl.classList.add('anim');
   renderStats();
 }
+/* 스와이프로 26/27/28일 전환 */
+(function(){
+  const zone=$('#p-plan');
+  let sx=0,sy=0,tracking=false;
+  zone.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1)return;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true;
+  },{passive:true});
+  zone.addEventListener('touchend',e=>{
+    if(!tracking)return;tracking=false;
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy)*1.4)return;
+    if(dx<0&&curDay<DAYLBL.length-1){curDay++;renderPlan('next');}
+    else if(dx>0&&curDay>0){curDay--;renderPlan('prev');}
+  },{passive:true});
+})();
 $('#timeline').addEventListener('click',e=>{
   const li=e.target.closest('li[data-id]');if(!li)return;
   const it=S.plan[curDay].find(x=>x.id===li.dataset.id);if(!it)return;
