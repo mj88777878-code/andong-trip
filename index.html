@@ -180,7 +180,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
   <div class="tools">
     <span id="saveState" class="state edit-only" role="status" aria-live="polite"></span>
     <button id="editBtn" type="button" aria-pressed="false">수정 모드</button>
-    <button id="themeBtn" type="button" aria-label="화면 모드 전환">화면 모드</button>
+    <button id="themeBtn" type="button" aria-label="다크/라이트 테마 전환">테마</button>
     <button id="printBtn" type="button">인쇄</button>
   </div>
   <div class="wrap">
@@ -606,6 +606,9 @@ $('#editBtn').onclick=()=>{
   if(!dbUrl()){openDb(true);return;}
   enterEdit();
 };
+
+/* 탭 복원(뒤로가기·앱 전환) 시에도 항상 보기 모드로 시작 */
+window.addEventListener('pageshow',e=>{if(e.persisted&&EDIT)setEdit(false);});
 
 /* 저장소 주소 등록 다이얼로그 (처음 한 번만) */
 const dbDlg=$('#dbDlg');let dbPending=false;
