@@ -50,9 +50,18 @@ a{color:var(--indigo)}
 .count{text-align:right}
 .count .n{font-family:var(--serif);font-weight:800;font-size:clamp(56px,10vw,92px);line-height:1;color:#f1c96b}
 .count .l{font-size:14px;opacity:.85}
-.tools{position:absolute;top:12px;right:14px;display:flex;gap:6px;z-index:2}
+.tools{position:absolute;top:12px;right:14px;left:14px;display:flex;gap:6px;z-index:2;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 .tools button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;padding:4px 12px;cursor:pointer;font-size:13px}
 .tools button:hover{background:rgba(255,255,255,.22)}
+
+/* view / edit mode */
+body:not(.edit) .edit-only{display:none!important}
+.tools .state{font-size:12px;color:#fff;opacity:.9;padding:0 4px}
+.tools .state.err{color:#ffb4ab;opacity:1;font-weight:700}
+body.edit .tools #editBtn{background:#f1c96b;border-color:#f1c96b;color:#1b2430;font-weight:700}
+body.edit .hero{box-shadow:inset 0 -4px 0 #f1c96b}
+input[readonly]:not(:focus){border-color:transparent;background:transparent}
+input[type=checkbox]:disabled{cursor:default}
 
 /* nav */
 nav.tabs{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
@@ -80,7 +89,7 @@ h3{font-size:16px;margin:0 0 10px}
 .btn.ghost:hover{border-color:var(--ink)}
 .btn.red{background:var(--red);border-color:var(--red);color:#fff}
 .btn.sm{padding:3px 10px;font-size:13px}
-input[type=text],input[type=number],input[type=time],input[type=date],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px}
+input[type=text],input[type=number],input[type=time],input[type=date],input[type=password],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px}
 textarea{min-height:120px;resize:vertical}
 label.f{display:block;font-size:13px;color:var(--sub);margin-bottom:10px}
 label.f>*:not(span){margin-top:4px;display:block}
@@ -169,6 +178,8 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
 <header class="hero">
   <canvas id="embers" aria-hidden="true"></canvas>
   <div class="tools">
+    <span id="saveState" class="state edit-only" role="status" aria-live="polite"></span>
+    <button id="editBtn" type="button" aria-pressed="false">수정 모드</button>
     <button id="themeBtn" type="button" aria-label="화면 모드 전환">화면 모드</button>
     <button id="printBtn" type="button">인쇄</button>
   </div>
@@ -197,7 +208,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
     <button role="tab" data-tab="places" aria-selected="false">가볼 곳·먹을 곳</button>
     <button role="tab" data-tab="info" aria-selected="false">예약·메모</button>
     <button role="tab" data-tab="fest" aria-selected="false">축제 정보</button>
-    <button role="tab" data-tab="data" aria-selected="false">백업</button>
+    <button role="tab" data-tab="data" aria-selected="false" class="edit-only">백업·설정</button>
   </div>
 </nav>
 
@@ -249,11 +260,11 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
 <!-- 일정표 -->
 <section class="panel" id="p-plan" role="tabpanel">
   <h2>일정표</h2>
-  <p class="lead">체크하면 완료 처리됩니다. 초안이니 시간과 장소를 자유롭게 수정하세요.</p>
+  <p class="lead">시간순 일정입니다. 수정 모드에서 체크하거나 자유롭게 편집할 수 있어요.</p>
   <div class="pills" id="dayPills"></div>
   <div class="row noprint" style="margin-bottom:14px;justify-content:space-between">
     <div class="muted" id="dayMeta" style="flex:1 1 auto"></div>
-    <button class="btn" type="button" id="addItem">일정 추가</button>
+    <button class="btn edit-only" type="button" id="addItem">일정 추가</button>
   </div>
   <ol class="tl" id="timeline"></ol>
 </section>
@@ -261,7 +272,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
 <!-- 예산 -->
 <section class="panel" id="p-budget" role="tabpanel">
   <h2>예산·정산</h2>
-  <p class="lead">쓴 돈을 기록하면 남은 예산과 1인당 금액을 자동으로 계산합니다.</p>
+  <p class="lead">지출 현황과 남은 예산, 1인당 금액을 자동으로 계산해 보여줍니다.</p>
   <div class="grid g2">
     <div class="card">
       <h3>설정</h3>
@@ -273,7 +284,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
       <div class="muted small" id="budLeft"></div>
       <div id="catBars" style="margin-top:14px"></div>
     </div>
-    <div class="card">
+    <div class="card edit-only">
       <h3>지출 추가</h3>
       <form id="expForm">
         <div class="row">
@@ -297,8 +308,8 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
 <!-- 준비물 -->
 <section class="panel" id="p-pack" role="tabpanel">
   <h2>준비물</h2>
-  <p class="lead">챙긴 것은 체크하세요. 가을 아침저녁은 쌀쌀할 수 있으니 겉옷을 권합니다.</p>
-  <div class="card noprint" style="margin-bottom:16px">
+  <p class="lead"><span class="edit-only">챙긴 것은 체크하세요. </span>가을 아침저녁은 쌀쌀할 수 있으니 겉옷을 권합니다.</p>
+  <div class="card noprint edit-only" style="margin-bottom:16px">
     <form id="packForm" class="row">
       <label class="f"><span>분류</span><select id="packGroup"></select></label>
       <label class="f" style="flex:3 1 200px"><span>준비물</span><input type="text" id="packText" placeholder="예: 보조배터리" required></label>
@@ -313,7 +324,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
 <!-- 장소 -->
 <section class="panel" id="p-places" role="tabpanel">
   <h2>가볼 곳·먹을 곳</h2>
-  <p class="lead">"일정에 넣기"를 누르면 원하는 날짜의 일정표에 바로 추가됩니다. 영업시간·휴무일은 방문 전 지도 앱에서 확인하세요.</p>
+  <p class="lead"><span class="edit-only">"일정에 넣기"를 누르면 원하는 날짜의 일정표에 바로 추가됩니다. </span>영업시간·휴무일은 방문 전 지도 앱에서 확인하세요.</p>
   <div class="pills" id="placeFilter"></div>
   <div class="grid g3" id="placeGrid"></div>
 </section>
@@ -321,9 +332,9 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
 <!-- 예약·메모 -->
 <section class="panel" id="p-info" role="tabpanel">
   <h2>예약·메모</h2>
-  <p class="lead">교통편, 숙소, 식당 예약 정보와 자유 메모를 적어 두세요.</p>
+  <p class="lead">교통편, 숙소, 식당 예약 정보와 자유 메모입니다.</p>
   <div class="grid g2">
-    <div class="card">
+    <div class="card edit-only">
       <h3>예약 추가</h3>
       <form id="bkForm">
         <div class="row">
@@ -384,9 +395,17 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
 </section>
 
 <!-- 백업 -->
-<section class="panel" id="p-data" role="tabpanel">
+<section class="panel edit-only" id="p-data" role="tabpanel">
   <h2>백업·복원</h2>
-  <p class="lead">입력한 내용은 이 브라우저(localStorage)에만 저장됩니다. 다른 기기와 공유하려면 파일로 내보내고 불러오세요.</p>
+  <p class="lead">수정한 내용은 연결된 무료 저장소에 자동 저장되어 모든 기기에서 같은 내용으로 보입니다. 백업 파일은 만약을 위한 사본이에요.</p>
+  <div class="card" style="margin-bottom:16px">
+    <h3>저장소 설정</h3>
+    <p class="small muted" id="dbInfo"></p>
+    <div class="row" style="align-items:center">
+      <button class="btn" type="button" id="dbOpen">주소 변경</button>
+      <button class="btn ghost" type="button" id="dbSaveNow">지금 저장</button>
+    </div>
+  </div>
   <div class="card">
     <div class="row" style="align-items:center">
       <button class="btn" type="button" id="exportBtn">내보내기(JSON)</button>
@@ -415,6 +434,17 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
     <div class="row" style="justify-content:flex-end">
       <button class="btn ghost" type="button" id="dlgCancel">취소</button>
       <button class="btn" type="submit">저장</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="dbDlg">
+  <form method="dialog" id="dbForm">
+    <h3>저장소 연결 (처음 한 번만)</h3>
+    <p class="small muted">수정 내용을 모든 기기에서 보려면 무료 저장소(Firebase Realtime Database) 주소가 필요해요. 로그인이나 토큰 입력은 필요 없고, 주소만 붙여넣으면 됩니다.</p>
+    <label class="f"><span>Realtime Database 주소</span><input type="text" id="dbUrl" required autocapitalize="off" autocomplete="off" placeholder="https://내프로젝트-default-rtdb.firebaseio.com"></label>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn ghost" type="button" id="dbCancel">취소</button>
+      <button class="btn" type="submit" id="dbSubmit">등록</button>
     </div>
   </form>
 </dialog>
@@ -475,12 +505,149 @@ function defaults(){
     bookings:[], memo:''
   };
 }
+const DKEY='andong-dirty-v1';
+let EDIT=false, loaded=false, lastRemote='';
+const hasLocal=(()=>{try{return !!localStorage.getItem(KEY);}catch(e){return false;}})();
 let S=load();
 function load(){
   try{const r=localStorage.getItem(KEY);if(r){return Object.assign(defaults(),JSON.parse(r));}}catch(e){}
   return defaults();
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const isDirty=()=>{try{return localStorage.getItem(DKEY)==='1';}catch(e){return false;}};
+const setDirty=v=>{try{v?localStorage.setItem(DKEY,'1'):localStorage.removeItem(DKEY);}catch(e){}};
+/* 사용자가 내용을 바꿀 때만 호출: 로컬 캐시 + (수정 모드면) GitHub 저장 예약 */
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  setDirty(true);
+  if(EDIT)scheduleSave();
+}
+
+/* ---------- 원격 저장소(DB) 동기화: 로그인·토큰 없이 주소 하나로 동작 ---------- */
+const DB_URL='https://andong-trip-default-rtdb.asia-southeast1.firebasedatabase.app';   /* ← 여기에 Firebase 주소를 넣으면 모든 기기에서 자동으로 읽고 씁니다 */
+const DBKEY='andong-db-v1';
+function dbUrl(){
+  let u=DB_URL;
+  if(!u){try{u=localStorage.getItem(DBKEY)||'';}catch(e){}}
+  u=(u||'').trim();if(!u)return '';
+  if(/firebaseio\.com|firebasedatabase\.app/.test(u)&&!/\.json(\?|$)/.test(u))u=u.replace(/\/+$/,'')+'/andong.json';
+  return u;
+}
+const validData=d=>d&&typeof d==='object'&&Array.isArray(d.plan);
+async function fetchRemote(){
+  const u=dbUrl();if(!u)return {status:'error'};
+  try{
+    const r=await fetch(u+(u.includes('?')?'&':'?')+'_='+Date.now(),{cache:'no-store'});
+    if(!r.ok)return {status:'error'};
+    const w=await r.json();
+    if(w==null)return {status:'none'};
+    const d=typeof w.json==='string'?JSON.parse(w.json):w;
+    return validData(d)?{status:'ok',data:d}:{status:'error'};
+  }catch(e){return {status:'error'};}
+}
+function adopt(d){
+  S=Object.assign(defaults(),d);
+  lastRemote=JSON.stringify(d);
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  setDirty(false);
+  renderAll();
+}
+function setStatus(t,err){const s=$('#saveState');s.textContent=t;s.classList.toggle('err',!!err);}
+let saveT=null,saving=false,again=false;
+function scheduleSave(){setStatus('저장 대기 중…');clearTimeout(saveT);saveT=setTimeout(pushRemote,1000);}
+async function pushRemote(){
+  saveT=null;
+  if(saving){again=true;return;}
+  const u=dbUrl();
+  if(!u){setStatus('저장소 설정 필요',true);return;}
+  saving=true;setStatus('저장 중…');
+  try{
+    const p=await fetch(u,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:'andong',json:JSON.stringify(S)})});
+    if(!p.ok)throw new Error(p.status===401||p.status===403?'저장소 규칙에서 쓰기가 허용돼 있는지 확인하세요':'저장 실패 ('+p.status+')');
+    lastRemote=JSON.stringify(S);
+    if(!again)setDirty(false);
+    setStatus(again?'저장 대기 중…':'저장됨 ✓');
+  }catch(err){
+    setStatus('저장 실패',true);toast(err&&err.message?err.message:'저장하지 못했어요');
+    again=false;
+  }finally{
+    saving=false;
+    if(again){again=false;scheduleSave();}
+  }
+}
+window.addEventListener('beforeunload',e=>{if(saveT||saving){e.preventDefault();e.returnValue='';}});
+
+/* ---------- 보기 / 수정 모드 ---------- */
+function applyMode(){
+  document.body.classList.toggle('edit',EDIT);
+  const b=$('#editBtn');b.textContent=EDIT?'보기 모드로':'수정 모드';b.setAttribute('aria-pressed',EDIT);
+  $('#budTotal').readOnly=!EDIT;$('#people').readOnly=!EDIT;$('#memo').readOnly=!EDIT;
+  $('#memo').placeholder=EDIT?'주차 정보, 살 물건, 동행자에게 전달할 내용 등':'';
+  renderDbInfo();
+}
+function setEdit(on){
+  EDIT=on;applyMode();renderAll();
+  if(!on){
+    if($('#p-data').classList.contains('on'))showTab('home');
+    if(saveT){clearTimeout(saveT);pushRemote();}else if(isDirty()&&dbUrl())pushRemote();
+  }
+}
+async function enterEdit(){
+  const b=$('#editBtn');
+  if(!loaded){toast('데이터를 불러오는 중이에요. 잠시 후 다시 눌러 주세요');return;}
+  b.disabled=true;b.textContent='확인 중…';
+  try{
+    if(!isDirty()){const r=await fetchRemote();if(r.status==='ok'&&JSON.stringify(r.data)!==lastRemote)adopt(r.data);}
+  }finally{b.disabled=false;}
+  setEdit(true);
+  if(isDirty())scheduleSave();else setStatus('수정 중');
+}
+$('#editBtn').onclick=()=>{
+  if(EDIT){setEdit(false);return;}
+  if(!dbUrl()){openDb(true);return;}
+  enterEdit();
+};
+
+/* 저장소 주소 등록 다이얼로그 (처음 한 번만) */
+const dbDlg=$('#dbDlg');let dbPending=false;
+function openDb(pending){
+  dbPending=!!pending;$('#dbUrl').value=DB_URL||(()=>{try{return localStorage.getItem(DBKEY)||'';}catch(e){return '';}})();
+  if(typeof dbDlg.showModal==='function')dbDlg.showModal();else dbDlg.setAttribute('open','');
+}
+$('#dbCancel').onclick=()=>dbDlg.close();
+$('#dbForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const v=$('#dbUrl').value.trim();if(!v)return;
+  const btn=$('#dbSubmit');btn.disabled=true;btn.textContent='확인 중…';
+  let prev='';try{prev=localStorage.getItem(DBKEY)||'';}catch(err){}
+  try{localStorage.setItem(DBKEY,v);}catch(err){}
+  let ok=false;
+  if(DB_URL){ok=true;}else{const r=await fetchRemote();ok=r.status!=='error';}
+  btn.disabled=false;btn.textContent='등록';
+  if(!ok){try{prev?localStorage.setItem(DBKEY,prev):localStorage.removeItem(DBKEY);}catch(err){}alert('저장소에 연결하지 못했어요. 주소와 규칙(.read/.write)을 확인해 주세요.');return;}
+  dbDlg.close();renderDbInfo();toast('저장소를 연결했어요');
+  alert('연결됐어요! 다른 기기에서도 같은 내용이 보이게 하려면 index.html 위쪽의 아래 줄에 이 주소를 넣고 GitHub에 올려 주세요.\n\nconst DB_URL=\''+v+'\';');
+  if(dbPending&&!EDIT){dbPending=false;const r=await fetchRemote();if(r.status==='none'&&hasLocal)setDirty(true);loaded=true;enterEdit();}
+});
+function renderDbInfo(){
+  const u=dbUrl();let host='';try{host=new URL(u).host;}catch(e){}
+  $('#dbInfo').textContent=u?'연결된 저장소: '+host:'저장소가 아직 연결되지 않았어요.';
+}
+$('#dbOpen').onclick=()=>openDb(false);
+$('#dbSaveNow').onclick=()=>{clearTimeout(saveT);pushRemote();};
+
+async function initRemote(){
+  const r=await fetchRemote();
+  if(r.status==='ok'){
+    if(isDirty()&&dbUrl()){lastRemote=JSON.stringify(r.data);/* 저장 못 한 내 수정 유지 */}
+    else adopt(r.data);
+  }else if(r.status==='none'&&hasLocal){setDirty(true);/* 기존 브라우저 데이터를 첫 저장 때 올림 */}
+  loaded=true;
+}
+document.addEventListener('visibilitychange',async()=>{
+  if(document.visibilityState!=='visible'||EDIT||!loaded||isDirty())return;
+  const r=await fetchRemote();
+  if(r.status==='ok'&&JSON.stringify(r.data)!==lastRemote&&!EDIT)adopt(r.data);
+});
 let toastT;
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),1800);}
 
@@ -495,13 +662,14 @@ $('#printBtn').onclick=()=>window.print();
 
 /* ---------- tabs ---------- */
 function showTab(id){
+  if(id==='data'&&!EDIT)id='home';
   $$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+id));
   $$('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));
   try{sessionStorage.setItem('andong-tab',id);}catch(e){}
   window.scrollTo({top:Math.min(window.scrollY,$('nav.tabs').offsetTop),behavior:'auto'});
 }
 $$('nav.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
-try{const t=sessionStorage.getItem('andong-tab');if(t&&$('#p-'+t))showTab(t);}catch(e){}
+try{const t=sessionStorage.getItem('andong-tab');if(t&&t!=='data'&&$('#p-'+t))showTab(t);}catch(e){}
 
 /* ---------- date helpers ---------- */
 function kstNow(){const d=new Date(Date.now()+9*3600e3);return {date:d.toISOString().slice(0,10),time:d.toISOString().slice(11,16)};}
@@ -530,25 +698,26 @@ function renderPlan(){
   $('#timeline').innerHTML=items.length?items.map(it=>`
     <li class="${it.done?'done':''}" data-id="${it.id}">
       <div class="t">${esc(it.time)}</div>
-      <div class="dot"><input type="checkbox" ${it.done?'checked':''} aria-label="${esc(it.title)} 완료"></div>
+      <div class="dot"><input type="checkbox" ${it.done?'checked':''} ${EDIT?'':'disabled'} aria-label="${esc(it.title)} 완료"></div>
       <div class="body">
         <div><span class="ti">${esc(it.title)}</span> <span class="tag ${esc(it.tag)}">${esc(it.tag)}</span></div>
         ${it.note?`<div class="small muted">${esc(it.note)}</div>`:''}
         <div class="acts">
           ${it.place?`<a href="${mapUrl(it.place)}" target="_blank" rel="noopener">지도 보기</a>`:''}
-          <button type="button" data-act="edit">수정</button>
-          <button type="button" data-act="del">삭제</button>
+          <button type="button" class="edit-only" data-act="edit">수정</button>
+          <button type="button" class="edit-only" data-act="del">삭제</button>
         </div>
       </div>
     </li>`).join(''):'<li class="muted" style="display:block">일정이 없습니다. "일정 추가"를 눌러 채워 보세요.</li>';
-  save();renderStats();
+  renderStats();
 }
 $('#timeline').addEventListener('click',e=>{
+  if(!EDIT)return;
   const li=e.target.closest('li[data-id]');if(!li)return;
   const it=S.plan[curDay].find(x=>x.id===li.dataset.id);if(!it)return;
-  if(e.target.matches('input[type=checkbox]')){it.done=e.target.checked;renderPlan();}
+  if(e.target.matches('input[type=checkbox]')){it.done=e.target.checked;save();renderPlan();}
   else if(e.target.dataset.act==='edit'){openDlg(it,curDay);}
-  else if(e.target.dataset.act==='del'){if(confirm('"'+it.title+'" 일정을 삭제할까요?')){S.plan[curDay]=S.plan[curDay].filter(x=>x!==it);renderPlan();toast('삭제했어요');}}
+  else if(e.target.dataset.act==='del'){if(confirm('"'+it.title+'" 일정을 삭제할까요?')){S.plan[curDay]=S.plan[curDay].filter(x=>x!==it);save();renderPlan();toast('삭제했어요');}}
 });
 
 /* dialog */
@@ -575,7 +744,7 @@ $('#itemForm').addEventListener('submit',e=>{
     S.plan.forEach((arr,i)=>{const k=arr.indexOf(editing);if(k>=0)arr.splice(k,1);});
     S.plan[day].push(Object.assign(editing,data));
   }else{S.plan[day].push(Object.assign({id:uid(),done:false},data));}
-  curDay=day;dlg.close();renderPlan();toast('저장했어요');
+  curDay=day;dlg.close();save();renderPlan();toast('저장했어요');
 });
 
 /* ---------- stats / home ---------- */
@@ -626,8 +795,8 @@ function renderBudget(){
     return `<div class="cat"><span>${c}</span><div class="meter"><i style="width:${v/max*100}%"></i></div><b>${won(v)}</b></div>`;}).join('');
   const label=d=>d==='before'?'여행 전':DAYLBL[DAYS.indexOf(d)];
   const ex=[...S.expenses].sort((a,b)=>(a.date==='before'?'0':a.date).localeCompare(b.date==='before'?'0':b.date));
-  $('#expList').innerHTML=ex.length?ex.map(e=>`<li data-id="${e.id}"><span class="tag">${esc(label(e.date))}</span><span class="tag">${esc(e.cat)}</span><span class="grow">${esc(e.name)}</span><b>${won(e.amount)}</b><button class="x" type="button" aria-label="삭제">×</button></li>`).join(''):'<li class="muted">아직 기록한 지출이 없어요.</li>';
-  save();renderStats();
+  $('#expList').innerHTML=ex.length?ex.map(e=>`<li data-id="${e.id}"><span class="tag">${esc(label(e.date))}</span><span class="tag">${esc(e.cat)}</span><span class="grow">${esc(e.name)}</span><b>${won(e.amount)}</b><button class="x edit-only" type="button" aria-label="삭제">×</button></li>`).join(''):'<li class="muted">아직 기록한 지출이 없어요.</li>';
+  renderStats();
 }
 $('#budTotal').addEventListener('input',e=>{S.budget=Math.max(0,+e.target.value||0);save();renderBudgetSummaryOnly();});
 $('#people').addEventListener('input',e=>{S.people=Math.max(1,+e.target.value||1);save();renderBudgetSummaryOnly();});
@@ -635,11 +804,11 @@ function renderBudgetSummaryOnly(){const spent=S.expenses.reduce((a,b)=>a+b.amou
 $('#expForm').addEventListener('submit',e=>{
   e.preventDefault();
   S.expenses.push({id:uid(),date:$('#expDate').value,cat:$('#expCat').value,name:$('#expName').value.trim(),amount:Math.max(0,+$('#expAmt').value||0)});
-  $('#expName').value='';$('#expAmt').value='';renderBudget();toast('지출을 추가했어요');
+  $('#expName').value='';$('#expAmt').value='';save();renderBudget();toast('지출을 추가했어요');
 });
 $('#expList').addEventListener('click',e=>{
   if(!e.target.classList.contains('x'))return;
-  const id=e.target.closest('li').dataset.id;S.expenses=S.expenses.filter(x=>x.id!==id);renderBudget();
+  const id=e.target.closest('li').dataset.id;S.expenses=S.expenses.filter(x=>x.id!==id);save();renderBudget();
 });
 
 /* ---------- packing ---------- */
@@ -649,18 +818,18 @@ function renderPack(){
   $('#packLists').innerHTML=PGROUPS.map(g=>{
     const items=S.packing.filter(p=>p.group===g);if(!items.length)return '';
     const d=items.filter(i=>i.done).length;
-    return `<div class="pk-group card"><h3><span>${g}</span><span class="muted small">${d}/${items.length}</span></h3><ul class="list">${items.map(i=>`<li data-id="${i.id}"><input type="checkbox" ${i.done?'checked':''} aria-label="${esc(i.text)}" style="accent-color:var(--red);width:18px;height:18px"><span class="grow" style="${i.done?'text-decoration:line-through;opacity:.55':''}">${esc(i.text)}</span><button class="x" type="button" aria-label="삭제">×</button></li>`).join('')}</ul></div>`;
+    return `<div class="pk-group card"><h3><span>${g}</span><span class="muted small">${d}/${items.length}</span></h3><ul class="list">${items.map(i=>`<li data-id="${i.id}"><input type="checkbox" ${i.done?'checked':''} ${EDIT?'':'disabled'} aria-label="${esc(i.text)}" style="accent-color:var(--red);width:18px;height:18px"><span class="grow" style="${i.done?'text-decoration:line-through;opacity:.55':''}">${esc(i.text)}</span><button class="x edit-only" type="button" aria-label="삭제">×</button></li>`).join('')}</ul></div>`;
   }).join('');
-  save();renderStats();
+  renderStats();
 }
 $('#packLists').addEventListener('click',e=>{
   const li=e.target.closest('li[data-id]');if(!li)return;const it=S.packing.find(x=>x.id===li.dataset.id);if(!it)return;
-  if(e.target.matches('input[type=checkbox]')){it.done=e.target.checked;renderPack();}
-  else if(e.target.classList.contains('x')){S.packing=S.packing.filter(x=>x!==it);renderPack();}
+  if(e.target.matches('input[type=checkbox]')){it.done=e.target.checked;save();renderPack();}
+  else if(e.target.classList.contains('x')){S.packing=S.packing.filter(x=>x!==it);save();renderPack();}
 });
 $('#packForm').addEventListener('submit',e=>{
   e.preventDefault();S.packing.push({id:uid(),group:$('#packGroup').value,text:$('#packText').value.trim(),done:false});
-  $('#packText').value='';renderPack();
+  $('#packText').value='';save();renderPack();
 });
 
 /* ---------- places ---------- */
@@ -686,21 +855,20 @@ function renderPlaces(){
   $$('#placeFilter .pill').forEach(b=>b.onclick=()=>{pf=b.dataset.f;renderPlaces();});
   $('#placeGrid').innerHTML=PLACES.map((p,i)=>({p,i})).filter(o=>pf==='전체'||o.p.c===pf).map(({p,i})=>`
     <div class="card place"><span class="tag ${p.tag}">${p.c}</span><h3 style="margin-top:8px">${esc(p.n)}</h3><p class="small muted">${esc(p.d)}</p>
-    <div class="acts"><a class="btn ghost sm" style="text-decoration:none" href="${mapUrl(p.q)}" target="_blank" rel="noopener">지도</a><button class="btn sm" type="button" data-i="${i}">일정에 넣기</button></div></div>`).join('');
+    <div class="acts"><a class="btn ghost sm" style="text-decoration:none" href="${mapUrl(p.q)}" target="_blank" rel="noopener">지도</a><button class="btn sm edit-only" type="button" data-i="${i}">일정에 넣기</button></div></div>`).join('');
   $$('#placeGrid .btn[data-i]').forEach(b=>b.onclick=()=>{const p=PLACES[+b.dataset.i];openDlg(null,curDay,{time:p.t,title:p.n,place:p.q,tag:p.tag,note:p.d});});
 }
 
 /* ---------- bookings / memo ---------- */
 function renderBk(){
-  $('#bkList').innerHTML=S.bookings.length?S.bookings.map(b=>`<li data-id="${b.id}"><span class="tag">${esc(b.type)}</span><span class="grow"><b>${esc(b.title)}</b>${b.when?` <span class="muted small">${esc(b.when)}</span>`:''}${b.ref?` <span class="small">예약번호 ${esc(b.ref)}</span>`:''}${b.memo?`<div class="small muted">${esc(b.memo)}</div>`:''}</span><button class="x" type="button" aria-label="삭제">×</button></li>`).join(''):'<li class="muted">등록한 예약이 없습니다.</li>';
-  save();
+  $('#bkList').innerHTML=S.bookings.length?S.bookings.map(b=>`<li data-id="${b.id}"><span class="tag">${esc(b.type)}</span><span class="grow"><b>${esc(b.title)}</b>${b.when?` <span class="muted small">${esc(b.when)}</span>`:''}${b.ref?` <span class="small">예약번호 ${esc(b.ref)}</span>`:''}${b.memo?`<div class="small muted">${esc(b.memo)}</div>`:''}</span><button class="x edit-only" type="button" aria-label="삭제">×</button></li>`).join(''):'<li class="muted">등록한 예약이 없습니다.</li>';
 }
 $('#bkForm').addEventListener('submit',e=>{
   e.preventDefault();
   S.bookings.push({id:uid(),type:$('#bkType').value,title:$('#bkTitle').value.trim(),when:$('#bkWhen').value.trim(),ref:$('#bkRef').value.trim(),memo:$('#bkMemo').value.trim()});
-  ['#bkTitle','#bkWhen','#bkRef','#bkMemo'].forEach(s=>$(s).value='');renderBk();toast('예약 정보를 추가했어요');
+  ['#bkTitle','#bkWhen','#bkRef','#bkMemo'].forEach(s=>$(s).value='');save();renderBk();toast('예약 정보를 추가했어요');
 });
-$('#bkList').addEventListener('click',e=>{if(e.target.classList.contains('x')){const id=e.target.closest('li').dataset.id;S.bookings=S.bookings.filter(b=>b.id!==id);renderBk();}});
+$('#bkList').addEventListener('click',e=>{if(e.target.classList.contains('x')){const id=e.target.closest('li').dataset.id;S.bookings=S.bookings.filter(b=>b.id!==id);save();renderBk();}});
 $('#memo').value=S.memo;
 $('#memo').addEventListener('input',e=>{S.memo=e.target.value;save();});
 
@@ -754,8 +922,8 @@ async function loadWeather(){
 })();
 
 /* ---------- init ---------- */
-function renderAll(){renderDday();renderPlan();renderBudget();renderPack();renderPlaces();renderBk();}
-renderAll();loadWeather();
+function renderAll(){renderDday();renderPlan();renderBudget();renderPack();renderPlaces();renderBk();$('#memo').value=S.memo;}
+applyMode();renderAll();loadWeather();initRemote();
 setInterval(()=>{renderDday();renderStats();},60000);
 })();
 </script>
