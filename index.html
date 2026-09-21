@@ -324,7 +324,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--sub);fon
 <!-- 장소 -->
 <section class="panel" id="p-places" role="tabpanel">
   <h2>가볼 곳·먹을 곳</h2>
-  <p class="lead"><span class="edit-only">"일정에 넣기"를 누르면 원하는 날짜의 일정표에 바로 추가됩니다. </span>영업시간·휴무일은 방문 전 지도 앱에서 확인하세요.</p>
+  <p class="lead">"일정에 넣기"를 누르면 원하는 날짜의 일정표에 바로 추가됩니다. 영업시간·휴무일은 방문 전 지도 앱에서 확인하세요.</p>
   <div class="pills" id="placeFilter"></div>
   <div class="grid g3" id="placeGrid"></div>
 </section>
@@ -701,7 +701,7 @@ function renderPlan(){
   $('#timeline').innerHTML=items.length?items.map(it=>`
     <li class="${it.done?'done':''}" data-id="${it.id}">
       <div class="t">${esc(it.time)}</div>
-      <div class="dot"><input type="checkbox" ${it.done?'checked':''} ${EDIT?'':'disabled'} aria-label="${esc(it.title)} 완료"></div>
+      <div class="dot"><input type="checkbox" ${it.done?'checked':''} aria-label="${esc(it.title)} 완료"></div>
       <div class="body">
         <div><span class="ti">${esc(it.title)}</span> <span class="tag ${esc(it.tag)}">${esc(it.tag)}</span></div>
         ${it.note?`<div class="small muted">${esc(it.note)}</div>`:''}
@@ -715,10 +715,10 @@ function renderPlan(){
   renderStats();
 }
 $('#timeline').addEventListener('click',e=>{
-  if(!EDIT)return;
   const li=e.target.closest('li[data-id]');if(!li)return;
   const it=S.plan[curDay].find(x=>x.id===li.dataset.id);if(!it)return;
   if(e.target.matches('input[type=checkbox]')){it.done=e.target.checked;save();renderPlan();}
+  else if(!EDIT)return;
   else if(e.target.dataset.act==='edit'){openDlg(it,curDay);}
   else if(e.target.dataset.act==='del'){if(confirm('"'+it.title+'" 일정을 삭제할까요?')){S.plan[curDay]=S.plan[curDay].filter(x=>x!==it);save();renderPlan();toast('삭제했어요');}}
 });
@@ -821,7 +821,7 @@ function renderPack(){
   $('#packLists').innerHTML=PGROUPS.map(g=>{
     const items=S.packing.filter(p=>p.group===g);if(!items.length)return '';
     const d=items.filter(i=>i.done).length;
-    return `<div class="pk-group card"><h3><span>${g}</span><span class="muted small">${d}/${items.length}</span></h3><ul class="list">${items.map(i=>`<li data-id="${i.id}"><input type="checkbox" ${i.done?'checked':''} ${EDIT?'':'disabled'} aria-label="${esc(i.text)}" style="accent-color:var(--red);width:18px;height:18px"><span class="grow" style="${i.done?'text-decoration:line-through;opacity:.55':''}">${esc(i.text)}</span><button class="x edit-only" type="button" aria-label="삭제">×</button></li>`).join('')}</ul></div>`;
+    return `<div class="pk-group card"><h3><span>${g}</span><span class="muted small">${d}/${items.length}</span></h3><ul class="list">${items.map(i=>`<li data-id="${i.id}"><input type="checkbox" ${i.done?'checked':''} aria-label="${esc(i.text)}" style="accent-color:var(--red);width:18px;height:18px"><span class="grow" style="${i.done?'text-decoration:line-through;opacity:.55':''}">${esc(i.text)}</span><button class="x edit-only" type="button" aria-label="삭제">×</button></li>`).join('')}</ul></div>`;
   }).join('');
   renderStats();
 }
@@ -858,7 +858,7 @@ function renderPlaces(){
   $$('#placeFilter .pill').forEach(b=>b.onclick=()=>{pf=b.dataset.f;renderPlaces();});
   $('#placeGrid').innerHTML=PLACES.map((p,i)=>({p,i})).filter(o=>pf==='전체'||o.p.c===pf).map(({p,i})=>`
     <div class="card place"><span class="tag ${p.tag}">${p.c}</span><h3 style="margin-top:8px">${esc(p.n)}</h3><p class="small muted">${esc(p.d)}</p>
-    <div class="acts"><a class="btn ghost sm" style="text-decoration:none" href="${mapUrl(p.q)}" target="_blank" rel="noopener">지도</a><button class="btn sm edit-only" type="button" data-i="${i}">일정에 넣기</button></div></div>`).join('');
+    <div class="acts"><a class="btn ghost sm" style="text-decoration:none" href="${mapUrl(p.q)}" target="_blank" rel="noopener">지도</a><button class="btn sm" type="button" data-i="${i}">일정에 넣기</button></div></div>`).join('');
   $$('#placeGrid .btn[data-i]').forEach(b=>b.onclick=()=>{const p=PLACES[+b.dataset.i];openDlg(null,curDay,{time:p.t,title:p.n,place:p.q,tag:p.tag,note:p.d});});
 }
 
